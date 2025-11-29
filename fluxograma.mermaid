@@ -1,0 +1,46 @@
+flowchart TD
+    A[Início: Transação de Cripto] --> B{Tipo de Transação?}
+
+    B -->|Deposit/Compra| C[Cria novo Lot]
+    C --> C1{Tag?}
+    C1 -->|Buy| C2[CostPerUnit = fiatValue,<br> acquisitionDate = data da <br>transação]
+    C1 -->|Staking/Airdrop/Interest| C3[CostPerUnit = 0,<br> acquisitionDate = data da<br> transação]
+
+    B -->|Withdrawal/Venda para FIAT| D[Evento Tributável]
+    D --> D1[Calcular FIFO para venda]
+    D1 --> D2[Usar<br> lot.originalAcquisitionDate<br>??<br>lot.acquisitionDate]
+    D2 --> D3[Apurar mais-valia e<br> aplicar taxas dedutíveis]
+
+    B -->|Transfer| E[Evento Fiscalmente Neutro]
+    E --> E1[Consumir Lot da<br> entidade de origem]
+    E1 --> E2[Criar novo Lot na<br> entidade de destino]
+    E2 --> E3[Preservar costPerUnit e<br> originalAcquisitionDate]
+
+    B -->|Trade/Permuta| F["Evento Neutro<br> 'Art. 10.º, n.º 20'"]
+    F --> F1[Consumir Lot do ativo<br> entregue]
+    F1 --> F2[Criar novo Lot para ativo<br> recebido]
+    F2 --> F3[CostPerUnit <br>=<br> valor de mercado do ativo<br> entregue]
+    F3 --> F4[AcquisitionDate <br>=<br> data da permuta,<br> originalAcquisitionDate <br>=<br> null]
+
+    %% Taxas
+    D3 --> G{Taxa Paga?}
+    E3 --> G
+    F4 --> G
+
+    G -->|FIAT| G1[Somar feeAmount às<br> despesas dedutíveis]
+    G -->|CRYPTO| G2[Calcular micro-alienação]
+    G2 --> G3{Tipo de Operação?}
+    G3 -->|Venda FIAT| G4[Apurar mais/menos-valia e<br> somar às despesas]
+    G3 -->|Transfer/Permuta| G5[Apurar alienação apenas<br> para taxa, não somar a<br> operação principal]
+
+    style A fill:#f9f,stroke:#333,stroke-width:2px,color:#000
+    
+    style B fill:#77f,stroke:#333,stroke-width:1px,color:#fff
+
+    style C fill:#cff,stroke:#333,stroke-width:1px,color:#000
+    style D fill:#f88,stroke:#333,stroke-width:1px,color:#000
+    style E fill:#cff,stroke:#333,stroke-width:1px,color:#000
+    style F fill:#cff,stroke:#333,stroke-width:1px,color:#000
+    style G fill:#bbf,stroke:#333,stroke-width:1px,color:#000
+    style C1 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
+    style G3 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
