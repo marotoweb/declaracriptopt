@@ -28,8 +28,6 @@ jobs:
       - name: Generate SVG (light)
         run: |
           mmdc \
-            --no-sandbox \
-            --disable-setuid-sandbox \
             -i fluxograma.mermaid \
             -o fluxograma.mermaid.svg \
             -b transparent
@@ -37,8 +35,6 @@ jobs:
       - name: Generate PNG (light)
         run: |
           mmdc \
-            --no-sandbox \
-            --disable-setuid-sandbox \
             -i fluxograma.mermaid \
             -o fluxograma.mermaid.png \
             -b transparent
@@ -50,8 +46,6 @@ jobs:
         run: |
           mmdc \
             --theme dark \
-            --no-sandbox \
-            --disable-setuid-sandbox \
             -i fluxograma.mermaid \
             -o fluxograma.dark.svg \
             -b transparent
@@ -60,8 +54,6 @@ jobs:
         run: |
           mmdc \
             --theme dark \
-            --no-sandbox \
-            --disable-setuid-sandbox \
             -i fluxograma.mermaid \
             -o fluxograma.dark.png \
             -b transparent
