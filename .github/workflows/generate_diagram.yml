@@ -20,7 +20,7 @@ jobs:
           node-version: '20'
 
       - name: Install mermaid-cli
-        run: npm install -g @mermaid-js/mermaid-cli
+        run: npm install -g @mermaid-js/mermaid-cli@10.3.0
 
       #
       # LIGHT MODE
