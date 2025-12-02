@@ -1,0 +1,41 @@
+name: Generate Mermaid Diagram
+
+on:
+  push:
+    paths:
+      - 'fluxograma.mermaid' # Só corre quando este ficheiro muda
+  workflow_dispatch: # Permite correr manualmente
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install mermaid-cli
+        run: |
+          npm install -g @mermaid-js/mermaid-cli
+
+      - name: Generate SVG from Mermaid
+        run: |
+          mmdc -i fluxograma.mermaid -o fluxograma.mermaid.svg -b transparent
+
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add fluxograma.mermaid.svg
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "docs: auto-generate diagram from mermaid file"
+            git push
+          fi
