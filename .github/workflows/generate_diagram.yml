@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repo
+      - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Set up Node.js
@@ -20,22 +20,64 @@ jobs:
           node-version: '18'
 
       - name: Install mermaid-cli
-        run: |
-          npm install -g @mermaid-js/mermaid-cli
+        run: npm install -g @mermaid-js/mermaid-cli
 
-      - name: Generate SVG from Mermaid
+      #
+      # LIGHT MODE
+      #
+      - name: Generate SVG (light)
         run: |
-          mmdc -i fluxograma.mermaid -o fluxograma.mermaid.svg -b transparent
+          mmdc \
+            --no-sandbox \
+            --disable-setuid-sandbox \
+            -i fluxograma.mermaid \
+            -o fluxograma.mermaid.svg \
+            -b transparent
 
+      - name: Generate PNG (light)
+        run: |
+          mmdc \
+            --no-sandbox \
+            --disable-setuid-sandbox \
+            -i fluxograma.mermaid \
+            -o fluxograma.mermaid.png \
+            -b transparent
+
+      #
+      # DARK MODE
+      #
+      - name: Generate SVG (dark)
+        run: |
+          mmdc \
+            --theme dark \
+            --no-sandbox \
+            --disable-setuid-sandbox \
+            -i fluxograma.mermaid \
+            -o fluxograma.dark.svg \
+            -b transparent
+
+      - name: Generate PNG (dark)
+        run: |
+          mmdc \
+            --theme dark \
+            --no-sandbox \
+            --disable-setuid-sandbox \
+            -i fluxograma.mermaid \
+            -o fluxograma.dark.png \
+            -b transparent
+
+      #
+      # COMMIT
+      #
       - name: Commit and push if changed
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add fluxograma.mermaid.svg
+          git add fluxograma.mermaid.svg fluxagrama.mermaid.png fluxograma.dark.svg fluxograma.dark.png
 
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "docs: auto-generate diagram from mermaid file"
+            git commit -m "docs: auto-generate diagram (light & dark) from Mermaid"
             git push
           fi
