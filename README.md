@@ -226,7 +226,7 @@ flowchart TD
     style G3 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
 ```
 
-[Ver fluxograma](fluxograma.mermaid.svg)
+[Ver fluxograma](/diagrams/fluxograma.mermaid.svg)
 
 ---
 
