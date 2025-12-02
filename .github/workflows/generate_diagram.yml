@@ -14,29 +14,21 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-
-      - name: Install mermaid-cli
-        run: npm install -g @mermaid-js/mermaid-cli@10.3.0
-
       #
       # LIGHT MODE
       #
       - name: Generate SVG (light)
         run: |
-          mmdc \
-            -i fluxograma.mermaid \
-            -o fluxograma.mermaid.svg \
+          docker run --rm -v ${{ github.workspace }}:/workspace minlag/mermaid-cli \
+            -i /workspace/fluxograma.mermaid \
+            -o /workspace/fluxograma.mermaid.svg \
             -b transparent
 
       - name: Generate PNG (light)
         run: |
-          mmdc \
-            -i fluxograma.mermaid \
-            -o fluxograma.mermaid.png \
+          docker run --rm -v ${{ github.workspace }}:/workspace minlag/mermaid-cli \
+            -i /workspace/fluxograma.mermaid \
+            -o /workspace/fluxograma.mermaid.png \
             -b transparent
 
       #
@@ -44,19 +36,19 @@ jobs:
       #
       - name: Generate SVG (dark)
         run: |
-          mmdc \
-            --theme dark \
-            -i fluxograma.mermaid \
-            -o fluxograma.dark.svg \
-            -b transparent
+          docker run --rm -v ${{ github.workspace }}:/workspace minlag/mermaid-cli \
+            -i /workspace/fluxograma.mermaid \
+            -o /workspace/fluxograma.dark.svg \
+            -b transparent \
+            --theme dark
 
       - name: Generate PNG (dark)
         run: |
-          mmdc \
-            --theme dark \
-            -i fluxograma.mermaid \
-            -o fluxograma.dark.png \
-            -b transparent
+          docker run --rm -v ${{ github.workspace }}:/workspace minlag/mermaid-cli \
+            -i /workspace/fluxograma.mermaid \
+            -o /workspace/fluxograma.dark.png \
+            -b transparent \
+            --theme dark
 
       #
       # COMMIT
@@ -65,7 +57,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add fluxograma.mermaid.svg fluxagrama.mermaid.png fluxograma.dark.svg fluxograma.dark.png
+          git add fluxograma.mermaid.svg fluxograma.mermaid.png fluxograma.dark.svg fluxograma.dark.png
 
           if git diff --staged --quiet; then
             echo "No changes to commit."
