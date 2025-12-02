@@ -14,6 +14,10 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      # Criar a pasta diagrams se não existir
+      - name: Create diagrams folder
+        run: mkdir -p diagrams
+
       #
       # LIGHT MODE
       #
@@ -21,14 +25,14 @@ jobs:
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace minlag/mermaid-cli \
             -i /workspace/fluxograma.mermaid \
-            -o /workspace/fluxograma.mermaid.svg \
+            -o /workspace/diagrams/fluxograma.mermaid.svg \
             -b transparent
 
       - name: Generate PNG (light)
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace minlag/mermaid-cli \
             -i /workspace/fluxograma.mermaid \
-            -o /workspace/fluxograma.mermaid.png \
+            -o /workspace/diagrams/fluxograma.mermaid.png \
             -b transparent
 
       #
@@ -38,7 +42,7 @@ jobs:
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace minlag/mermaid-cli \
             -i /workspace/fluxograma.mermaid \
-            -o /workspace/fluxograma.dark.svg \
+            -o /workspace/diagrams/fluxograma.dark.svg \
             -b transparent \
             --theme dark
 
@@ -46,7 +50,7 @@ jobs:
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace minlag/mermaid-cli \
             -i /workspace/fluxograma.mermaid \
-            -o /workspace/fluxograma.dark.png \
+            -o /workspace/diagrams/fluxograma.dark.png \
             -b transparent \
             --theme dark
 
@@ -55,9 +59,9 @@ jobs:
       #
       - name: Commit and push if changed
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add fluxograma.mermaid.svg fluxograma.mermaid.png fluxograma.dark.svg fluxograma.dark.png
+          git config --global user.name "Rob Automation"
+          git config --global user.email "4264711+marotoweb@users.noreply.github.com"
+          git add diagrams/fluxograma.mermaid.svg diagrams/fluxograma.mermaid.png diagrams/fluxograma.dark.svg diagrams/fluxograma.dark.png
 
           if git diff --staged --quiet; then
             echo "No changes to commit."
