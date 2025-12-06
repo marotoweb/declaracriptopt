@@ -5,7 +5,7 @@
 ### Índice
 
 1. [Objetivo do projeto](#1-objetivo-do-projeto)  
-2. [Arquitetura do algoritmo (v1.1)](#2-arquitetura-do-algoritmo-v11)  
+2. [Arquitetura do algoritmo](#2-arquitetura-do-algoritmo-v12)  
    1. [Visão geral e conformidade legal](#1-visão-geral-e-conformidade-legal)  
    2. [Estrutura de dados e lotes](#2-estrutura-de-dados-lotes-e-o-campo-originalacquisitiondate)  
    3. [Tratamento por tipo de transação](#3-tratamento-por-tipo-de-transação)  
