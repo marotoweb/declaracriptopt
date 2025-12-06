@@ -160,7 +160,7 @@ Isto garante que transferências anteriores não reiniciam o contador dos 365 di
 
 A data da transferência `acquisitionDate` **não influencia os 365 dias**.
 
-### ➤ Caso 1: Venda para FIAT (`fiatValue > 0`, `tag: 'sell'`)
+#### ➤ Caso 1: Venda para FIAT (`fiatValue > 0`, `tag: 'sell'`)
 **Exemplo:**
 - Data: 2024-10-01
 - Entidade: Binance
@@ -580,7 +580,7 @@ flowchart TD
 ## 🤝 Como Contribuir
 
 Encontrou uma falha na nossa lógica? Acha que uma interpretação pode ser mais rigorosa?
-1.  Abra uma **[Issue](issues)** para iniciar a discussão.
+1.  Abra uma **[Issue](https://github.com/marotoweb/declaracriptopt/issues)** para iniciar a discussão.
 2.  Se tiver uma sugestão de texto, pode submeter um **Pull Request** para melhorar este documento.
 
 ---
