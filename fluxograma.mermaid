@@ -1,44 +1,53 @@
 flowchart TD
-    A[Início: Transação de Cripto] --> B{Tipo de Transação?}
+  A[Início: Transação de Cripto] --> B{Tipo de Transação?}
 
-    B -->|Deposit<br>Compra| C[Cria novo Lot]
-    C --> C1{Tag?}
-    C1 -->|Buy| C2[CostPerUnit = fiatValue,<br> acquisitionDate = data da <br>transação]
-    C1 -->|Staking/Airdrop/Interest| C3[CostPerUnit = 0,<br> acquisitionDate = data da<br> transação]
+  B -->|Deposit<br>Compra| C[Cria novo Lot]
+  C --> C1{Tag?}
+  C1 -->|Buy| C2[CostPerUnit = fiatValue,<br> acquisitionDate = data da <br>transação]
+  C1 -->|Staking/Airdrop/Interest| C3[CostPerUnit = 0,<br> acquisitionDate = data da<br> transação]
+  C1 -->|Defi| C4[CostPerUnit = 0 'se rendimento'<br> ou custo dos ativos entregues 'se LP']
 
-    B -->|Withdrawal<br>Alienação não-cripto| D[Evento Tributável]
-    D --> D1[Calcular FIFO para venda]
-    D1 --> D2[Usar<br> originalAcquisitionDate<br>se existir senão<br>acquisitionDate]
-    D2 --> D3[Apurar mais-valia e<br> aplicar encargos 'fees']
+  B -->|Withdrawal<br>Alienação não-cripto| D[Evento Tributável]
+  D --> D1[Calcular FIFO para venda]
+  D1 --> D2[Usar<br> originalAcquisitionDate<br>se existir senão<br>acquisitionDate]
+  D2 --> D3[Apurar mais-valia e<br> aplicar encargos 'fees']
 
-    B -->|Transfer/Transferência| E[Evento Fiscalmente Neutro]
-    E --> E1[Consumir Lot da<br> entidade de origem]
-    E1 --> E2[Criar novo Lot na<br> entidade de destino]
-    E2 --> E3[Preservar costPerUnit e<br> originalAcquisitionDate]
+  B -->|Transfer/Transferência| E[Evento Fiscalmente Neutro]
+  E --> E1[Consumir Lot da<br> entidade de origem]
+  E1 --> E2[Criar novo Lot na<br> entidade de destino]
+  E2 --> E3[Preservar costPerUnit e<br> originalAcquisitionDate]
 
-    B -->|Trade/Permuta| F["Evento Neutro<br> 'Art. 10.º, n.º 20'"]
-    F --> F1[Consumir Lot do ativo<br> entregue 'FIFO']
-    F1 --> F2[Criar novo Lot para ativo<br> recebido]
-    F2 --> F3[CostPerUnit <br>=<br> custo de aquisição<br> dos lotes entregues]
-    F3 --> F4[acquisitionDate <br>=<br> data da permuta,<br> originalAcquisitionDate <br>=<br> null]
+  B -->|Trade/Permuta| F["Evento Neutro<br> 'Art. 10.º, n.º 20'"]
+  F --> F1[Consumir Lot do ativo<br> entregue 'FIFO']
+  F1 --> F2[Criar novo Lot para ativo<br> recebido]
+  F2 --> F3[CostPerUnit <br>=<br> custo de aquisição<br> dos lotes entregues]
+  F3 --> F4[acquisitionDate <br>=<br> data da permuta,<br> originalAcquisitionDate <br>=<br> null]
 
-    %% Taxas
-    D3 --> G{Taxa Paga?}
-    E3 --> G
-    F4 --> G
+  B -->|DeFi| G[Tratar como<br> staking, LP, ou troca]
+  G --> G1{Tipo de DeFi?}
+  G1 -->|Staking/Rewards| G2[CostPerUnit = 0]
+  G1 -->|LP/Permuta| G3[CostPerUnit = custo<br> dos ativos entregues]
+  G1 -->|Withdrawal| G4[Calcular mais-valia<br> com FIFO]
 
-    G -->|FIAT| G1[Taxa reduz o valor de<br> realização]
-    G -->|CRYPTO| G2[Micro-alienação: apurar<br> mais/menos-valia da taxa]
-    G2 --> G3{Operação principal<br> tributável?}
-    G3 -->|Sim| G4[Somar taxa como encargo<br> da alienação principal]
-    G3 -->|Não| G5[Registar apenas a<br> micro-alienação da taxa]
+  %% Taxas
+  D3 --> H{Taxa Paga?}
+  E3 --> H
+  F4 --> H
+  G4 --> H
 
-    style A fill:#f9f,stroke:#333,stroke-width:2px,color:#000
-    style B fill:#77f,stroke:#333,stroke-width:1px,color:#fff
-    style C fill:#cff,stroke:#333,stroke-width:1px,color:#000
-    style D fill:#f88,stroke:#333,stroke-width:1px,color:#000
-    style E fill:#cff,stroke:#333,stroke-width:1px,color:#000
-    style F fill:#cff,stroke:#333,stroke-width:1px,color:#000
-    style G fill:#bbf,stroke:#333,stroke-width:1px,color:#000
-    style C1 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
-    style G3 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
+  H -->|FIAT| H1[Taxa reduz o valor de<br> realização]
+  H -->|CRYPTO| H2[Micro-alienação: apurar<br> mais/menos-valia da taxa]
+  H2 --> H3{Operação principal<br> tributável?}
+  H3 -->|Sim| H4[Somar taxa como encargo<br> da alienação principal]
+  H3 -->|Não| H5[Registar apenas a<br> micro-alienação da taxa]
+
+  style A fill:#f9f,stroke:#333,stroke-width:2px,color:#000
+  style B fill:#77f,stroke:#333,stroke-width:1px,color:#fff
+  style C fill:#cff,stroke:#333,stroke-width:1px,color:#000
+  style D fill:#f88,stroke:#333,stroke-width:1px,color:#000
+  style E fill:#cff,stroke:#333,stroke-width:1px,color:#000
+  style F fill:#cff,stroke:#333,stroke-width:1px,color:#000
+  style G fill:#bbf,stroke:#333,stroke-width:1px,color:#000
+  style H fill:#fffbcc,stroke:#333,stroke-width:1px,color:#000
+  style C1 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
+  style H3 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
