@@ -1,6 +1,7 @@
 # Documento Técnico: Um algoritmo aberto para a fiscalidade de criptoativos em Portugal
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+---
 
 ### Índice
 
@@ -28,6 +29,7 @@
 3. [Como contribuir](#🤝-como-contribuir)  
 4. [Licença](#📄-licença)
 
+---
 
 ## 1. Objetivo do projeto
 
@@ -42,7 +44,7 @@ O objetivo é criar e manter uma "fonte da verdade" lógica e transparente que p
 
 ---
 
-## 2. Arquitetura do algoritmo (v1.2)
+## 2. Arquitetura do algoritmo (v1.3)
 
 ### 1. Visão geral e conformidade legal
 
@@ -51,7 +53,7 @@ Este documento descreve um algoritmo fiscal, desenhado para estar em conformidad
 O motor opera sobre cinco princípios fundamentais:
 
 1. **FIFO por entidade depositária (Art. 43.º, n.º 9):**  
-   O método `FIFO (First-In, First-Out) é aplicado individualmente a cada "entidade depositária" (ex.: exchanges).  
+   O método `FIFO (First-In, First-Out)` é aplicado individualmente a cada "entidade depositária" (ex.: exchanges).
    Todas as carteiras **self-custody** (frias, quentes, etc.) são tratadas como uma única entidade depositária para efeitos de cálculo, a menos que o utilizador opte por separá-las.
 
 2. **Transferência entre entidades é um evento neutro:**  
@@ -80,7 +82,7 @@ Cada `Lot` deve ter:
 
 >**📝 Nota:** Para que serve `originalAcquisitionDate`?   
 >
->Para preservar a data real de aquisição de um lote que foi comprado numa entidade **A** e posteriormente transferido para **B**.  
+>Para preservar a data real de aquisição de um lote que foi comprado numa entidade **A** e posteriormente transferido para **B**.
 >Sem este campo, o algoritmo poderia reiniciar o contador dos **365 dias** ao receber o ativo noutra entidade
 
 ---
@@ -94,7 +96,6 @@ Um depósito é sempre uma **aquisição** que cria um novo lote:
 *   **tag: '`buy`':** `costPerUnit` = `fiatValue`, `acquisitionDate` = data da transação.
 *   **tag: '`staking`', '`airdrop`', '`interest`', '`rewards`':** `costPerUnit` = 0, `acquisitionDate` = data da transação.
 *   **`originalAcquisitionDate`** = `null`.
-
 
 #### ➤ Caso 1: Compra com FIAT (`tag: 'buy'`)
 **Exemplo:**
@@ -132,7 +133,7 @@ Um depósito é sempre uma **aquisição** que cria um novo lote:
 
 Inclui **qualquer alienação para algo não-cripto**, como:
 
-*   **FIAT**  
+*   **FIAT**
 *   **NFT**
 *   **Compra de bens ou serviços**
 *   **Pagamentos com cartões que gaste a sua cripto**
@@ -143,8 +144,7 @@ Inclui **qualquer alienação para algo não-cripto**, como:
 
 Aciona `_calculateFifoForSale` na entidade de origem.
 
-Para cada lote consumido: `**data de aquisição efetiva = originalAcquisitionDate ?? acquisitionDate**
-
+Para cada lote consumido: `**data de aquisição efetiva = originalAcquisitionDate ?? acquisitionDate**`
 
 Isto garante que transferências anteriores não reiniciam o contador dos 365 dias.
 
@@ -194,33 +194,38 @@ A data da transferência `acquisitionDate` **não influencia os 365 dias**.
 - Total mais-valia = 15.000€ + 30€ = **15.030€**
 - IRS devido = 15.030€ × 28% = **4.208,40€**
 
-#### ➤ Caso 3: Transferência entre entidades (`tag: 'transfer'`, `fiatValue = null`)
+#### ➤ Caso 3: Transferência entre entidades com taxa (`tag: 'transfer'`, `fiatValue = null`)
 **Exemplo:**
 - Data: 2024-06-01
 - Entidade de origem: Binance
 - Entidade de destino: Ledger
 - Ativo: BTC
-- Quantidade: 0.5
+- Quantidade enviada: 0.5
+- Taxa: 0.001 BTC (valor implícito: 60€)
 - Custo do lote consumido: 0.5 × 30.000€ = 15.000€
 - Data de aquisição original: 2023-01-15
 
 **Resultado:**
-- Cria novo lote na Ledger:
+- **Micro-alienação da taxa:**
+  - Custo da taxa = 0.001 × 30.000€ = 30€
+  - Mais-valia da taxa = 60€ - 30€ = **30€**
+- **Cria novo lote na Ledger:**
   - `acquisitionDate = 2024-06-01`
   - `costPerUnit = 30.000€`
-  - `amount = 0.5`
+  - `amount = 0.499`
   - `originalAcquisitionDate = 2023-01-15`
 
-➡️ **Evento neutro fiscalmente**, não gera mais-valia.
+➡️ **Evento neutro fiscalmente**, não gera mais-valia — mas a taxa foi apurada separadamente.
+
 
 #### 3.3. `trade` (Permuta cripto-cripto)
 
 ➡️ **Evento neutro - Art. 10.º, n.º 20**
 
- 1. Consome lotes do ativo entregue.  
- 2. Cria novo lote do ativo recebido.  
+ 1. Consome lotes do ativo entregue.
+ 2. Cria novo lote do ativo recebido.
  3. O custo do novo lote é: `costPerUnit` = custo de aquisição dos lotes entregues
- 4. `acquisitionDate` = data da permuta.  
+ 4. `acquisitionDate` = data da permuta.
  5. `originalAcquisitionDate` = `null`.
 
 #### ➤ Caso 1: Permuta simples (BTC → ETH)
@@ -289,8 +294,7 @@ A taxa é uma **micro-alienação** do ativo usado para pagá-la.
 Valor de realização:
 
 1. **Venda para FIAT:**  
-   Usa o **preço implícito** da venda: `**valor = fiatValue / fromAmount**
-
+   Usa o **preço implícito** da venda: `**valor = fiatValue / fromAmount**`
 
 2. **Permuta ou transferência:**  
    Usa `feeFiatValue`, introduzido pelo utilizador.
@@ -328,10 +332,13 @@ Valor de realização:
 - Total mais-valia = 15.000€ + 30€ = **15.030€**
 - IRS = 15.030€ × 28% = **4.208,40€**
 
+> **📝 Nota sobre taxas em transferências:**  
+> Mesmo que a transferência entre entidades do mesmo titular seja neutra fiscalmente, a taxa de rede paga em cripto é uma micro-alienação — e deve ser apurada separadamente para manter a precisão dos custos nos lotes.
+
 ---
 
 ### 5. Tratamento fiscal de NFT
-#### 5.1 O que é NFT? 
+#### 5.1 O que é NFT?
 NFT significa Non-Fungible Token, em português: Token Não Fungível.
 
 **Não fungível** = Único e irrepetível
@@ -340,8 +347,7 @@ Um NFT é único - não pode ser trocado por outro igual, porque cada um tem car
 
 Exemplo:
 - Um Bitcoin = outro Bitcoin → fungível.
--Um NFT de uma obra de arte digital = só existe um → não fungível.
-
+- Um NFT de uma obra de arte digital = só existe um → não fungível.
 
 #### 5.2. Enquadramento fiscal de NFT em Portugal (CIRS)
 Para efeitos do Código do IRS, NFT são tratados como criptoativos.
@@ -429,7 +435,7 @@ O **Código do IRS não distingue explicitamente entre DeFi e CeFi**, ou seja, *
 2. **Alienação de ativos DeFi (venda, troca, saque)** → **mais-valia calculada com FIFO** (Art. 43.º, n.º 9).
 3. **Permutas DeFi (ex.: ETH → LP Token)** → **neutras fiscalmente** (Art. 10.º, n.º 20).
 4. **Taxas em DeFi (gas fees, comissões)** → tratadas como **micro-alienações** se pagas em cripto.
-5. **Isenção após 365 dias** → aplicável, desde que o ativo seja detido pore 365 diasou mais (independentemente de estar em DeFi ou CeFi).
+5. **Isenção após 365 dias** → aplicável, desde que o ativo seja detido por 365 dias ou mais (independentemente de estar em DeFi ou CeFi).
 
 #### 6.4. Como implementar DeFi no algoritmo
 
@@ -509,9 +515,9 @@ O **Código do IRS não distingue explicitamente entre DeFi e CeFi**, ou seja, *
 
 - **Depósitos:** criam novos lotes com custo real ou zero, dependendo do tipo (`buy` ou rendimento passivo).  
 - **Alienações para FIAT, NFT, bens, serviços ou qualquer ativo não-cripto:** tributáveis se detidos menos de 365 dias; isentos se ≥=365 dias. Apuram-se mais-valias usando FIFO e preservando datas originais.
-- **Transferências entre entidades:** evento neutro, preserva data e custo.  
+- **Transferências entre entidades:** evento neutro, preserva data e custo - **inclui tratamento de taxas como micro-alienações**.  
 - **Permutas:** evento neutro - o novo ativo tem como custo o valor de aquisição do ativo entregue e como data de aquisição a data da permuta
-- **Taxas:** separa lógica entre FIAT e cripto, aplicando dupla entrada quando necessário - e podem tambem ser dedutiveis nas mais-valias
+- **Taxas:** separa lógica entre FIAT e cripto, aplicando dupla entrada quando necessário - e podem tambem ser dedutiveis nas mais-valias. **Inclui tratamento de taxas em transferências como micro-alienações.**.  
 
 ---
 
