@@ -4,38 +4,41 @@ flowchart TD
   B -->|Deposit<br>Compra| C[Cria novo Lot]
   C --> C1{Tag?}
   C1 -->|Buy| C2[CostPerUnit = fiatValue,<br> acquisitionDate = data da <br>transação]
-  C1 -->|Staking/Airdrop/Interest| C3[CostPerUnit = 0,<br> acquisitionDate = data da<br> transação]
-  C1 -->|Defi| C4[CostPerUnit = 0 'se rendimento'<br> ou custo dos ativos entregues 'se LP']
+  C1 -->|Staking/Airdrop/Interest| C3[CostPerUnit = Valor Mercado<br> no dia da receção<br> Declarar Cat. E]
+  C1 -->|Defi| C4[CostPerUnit = Valor Mercado<br> se rendimento<br> ou custo dos ativos<br> se LP]
 
-  B -->|Withdrawal<br>Alienação não-cripto| D[Evento Tributável]
-  D --> D1[Calcular FIFO para venda]
-  D1 --> D2[Usar<br> originalAcquisitionDate<br>se existir senão<br>acquisitionDate]
-  D2 --> D3[Apurar mais-valia e<br> aplicar encargos 'fees']
+  B -->|Withdrawal<br>Alienação não-cripto| D[Evento Tributável?]
+  D --> D1{É Security Token?}
+  D1 -->|Sim| D2[Sempre Tributável<br> Sem isenção 365 dias]
+  D1 -->|Não| D3[Verificar Dias Detidos]
+  D3 -->|< 365 dias| D4[Tributável<br> Cat. G]
+  D3 -->|&gt= 365 dias| D5[Isento<br> Cat. G]
+  D2 & D4 & D5 --> D6[Apurar Mais-Valia FIFO<br> Usar originalAcquisitionDate]
 
   B -->|Transfer/Transferência| E[Evento Fiscalmente Neutro]
   E --> E1[Consumir Lot da<br> entidade de origem]
   E1 --> E2[Criar novo Lot na<br> entidade de destino]
-  E2 --> E3[Preservar costPerUnit e<br> originalAcquisitionDate]
+  E2 --> E3[Preservar costPerUnit,<br> originalAcquisitionDate<br> e isSecurityToken]
 
   B -->|Trade/Permuta| F["Evento Neutro<br> 'Art. 10.º, n.º 20'"]
   F --> F1[Consumir Lot do ativo<br> entregue 'FIFO']
   F1 --> F2[Criar novo Lot para ativo<br> recebido]
   F2 --> F3[CostPerUnit <br>=<br> custo de aquisição<br> dos lotes entregues]
-  F3 --> F4[acquisitionDate <br>=<br> data da permuta,<br> originalAcquisitionDate <br>=<br> null]
+  F3 --> F4[acquisitionDate <br>=<br> data da permuta<br> originalAcquisitionDate = null<br> Contador 365 dias REINICIA]
 
   B -->|DeFi| G[Tratar como<br> staking, LP, ou troca]
   G --> G1{Tipo de DeFi?}
-  G1 -->|Staking/Rewards| G2[CostPerUnit = 0]
-  G1 -->|LP/Permuta| G3[CostPerUnit = custo<br> dos ativos entregues]
-  G1 -->|Withdrawal| G4[Calcular mais-valia<br> com FIFO]
+  G1 -->|Staking/Rewards| G2[CostPerUnit = Valor Mercado<br> Declarar Cat. E]
+  G1 -->|LP/Permuta| G3[CostPerUnit = custo<br> dos ativos entregues<br> Reinicia 365 dias]
+  G1 -->|Withdrawal LP| G4[Alienação do LP Token<br> Calcular Mais-Valia FIFO]
 
   %% Taxas
-  D3 --> H{Taxa Paga?}
+  D6 --> H{Taxa Paga?}
   E3 --> H
   F4 --> H
   G4 --> H
 
-  H -->|FIAT| H1[Taxa reduz o valor de<br> realização]
+  H -->|FIAT| H1[Taxa reduz o valor de<br> realização / encargo]
   H -->|CRYPTO| H2[Micro-alienação: apurar<br> mais/menos-valia da taxa]
   H2 --> H3{Operação principal<br> tributável?}
   H3 -->|Sim| H4[Somar taxa como encargo<br> da alienação principal]
@@ -49,5 +52,6 @@ flowchart TD
   style F fill:#cff,stroke:#333,stroke-width:1px,color:#000
   style G fill:#bbf,stroke:#333,stroke-width:1px,color:#000
   style H fill:#fffbcc,stroke:#333,stroke-width:1px,color:#000
+  style D1 fill:#ff9999,stroke:#333,stroke-width:2px,color:#000
   style C1 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
   style H3 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
