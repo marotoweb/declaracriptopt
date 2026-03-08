@@ -206,10 +206,10 @@ Para cada lote consumido: **`data de aquisição efetiva = originalAcquisitionDa
 
  1. Consome lotes da entidade de origem.  
  2. Cria lotes na entidade de destino.  
- 3. Mantém:
+ 3. Preserva os seguintes dados inalterados:
     *   `costPerUnit`
-    *   `originalAcquisitionDate` correto.
-    *   `isSecurityToken` correto.
+    *   `originalAcquisitionDate`
+    *   `isSecurityToken`
 
 A data da transferência `acquisitionDate` **não influencia os 365 dias**.
 
