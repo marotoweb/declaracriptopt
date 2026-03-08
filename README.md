@@ -163,18 +163,19 @@ Um depósito é sempre uma **aquisição** que cria um novo lote:
 #### ➤ Caso 2: Rendimento passivo (`tag: 'staking'`)
 **Exemplo:**
 - Data: 2024-03-10
-- Entidade: Ledger
+- Entidade: Ledger (ou Exchange)
 - Ativo: ETH
-- Quantidade: 2.0
-- Valor de Mercado na data: 4.000€ (2.000€/unidade)
+- Quantidade: 0.05 (Recompensa típica mensal para um staking médio)
+- Valor de Mercado na data: 150,00€ (3.000,00€ por ETH)
 
 **Resultado:**
 - Cria novo lote:
   - `acquisitionDate = 2024-03-10`
-  - `costPerUnit = 2.000€` (Valor de mercado, NÃO zero)
-  - `amount = 2.0`
+  - `costPerUnit = 3.000,00€` (Valor de mercado unitário, NÃO zero)
+  - `amount = 0.05`
   - `originalAcquisitionDate = null`
-- *Ação Fiscal:* Declarar 4.000€ como rendimento Categoria E no IRS de 2024.
+- *Ação Fiscal:* Declarar **150,00€** como rendimento Categoria E no IRS de 2024.
+  - *Nota:* Na venda futura deste lote, o custo a abater será estes 150,00€, evitando dupla tributação.
 
 ---
 
