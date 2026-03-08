@@ -20,29 +20,52 @@ Este algoritmo é uma ferramenta de cálculo baseada numa interpretação lógic
 
 ### Índice
 
-1. [Objetivo do projeto](#1-objetivo-do-projeto)  
-2. [Arquitetura do algoritmo](#2-arquitetura-do-algoritmo-v14)  
-   1. [Visão geral e conformidade legal](#1-visão-geral-e-conformidade-legal)  
-   2. [Estrutura de dados e lotes](#2-estrutura-de-dados-lotes-e-o-campo-originalacquisitiondate)  
-   3. [Tratamento por tipo de transação](#3-tratamento-por-tipo-de-transação)  
-      1. [Depósito (`deposit`)](#31-deposit)  
-      2. [Levantamento (`withdrawal`)](#32-withdrawal)  
-      3. [Permuta (`trade`)](#33-trade-permuta-cripto-cripto)  
-   4. [Tratamento das taxas](#4-tratamento-das-taxas)  
-      1. [Taxa paga em FIAT](#41-taxa-paga-em-fiat)  
-      2. [Taxa paga em cripto](#42-taxa-paga-em-cripto)  
-   5. [Tratamento fiscal de NFT](#5-tratamento-fiscal-de-nft)
-      1. [O que é NFT](#51-o-que-é-nft)
-      2. [Enquadramento fiscal de NFT em Portugal (CIRS)](#52-enquadramento-fiscal-de-nft-em-portugal-cirs)
-   6. [Tratamento fiscal de DeFi](#6-tratamento-fiscal-de-defi)
-      1. [O que é DeFi](#61-o-que-é-defi)
-      2. [Enquadramento fiscal em Portugal (CIRS)](#62-enquadramento-fiscal-de-defi-em-portugal-cirs)
-      3. [Princípios aplicáveis ao DeFi](#63-princípios-aplicáveis-ao-defi)
-      4. [Como implementar DeFi no algoritmo](#64-como-implementar-defi-no-algoritmo)
-   7. [Sumário Final](#7-sumário-final)  
-   8. [Fluxograma das transações](#8-fluxograma-das-transações)  
-3. [Como contribuir](#🤝-como-contribuir)  
-4. [Licença](#📄-licença)
+- [Documento Técnico: Um algoritmo aberto para a fiscalidade de criptoativos em Portugal](#documento-técnico-um-algoritmo-aberto-para-a-fiscalidade-de-criptoativos-em-portugal)
+    - [⚠️ Aviso Legal e Limitações (Leitura Obrigatória)](#️-aviso-legal-e-limitações-leitura-obrigatória)
+    - [Índice](#índice)
+  - [1. Objetivo do projeto](#1-objetivo-do-projeto)
+  - [2. Arquitetura do algoritmo (v1.4)](#2-arquitetura-do-algoritmo-v14)
+    - [1. Visão geral e conformidade legal](#1-visão-geral-e-conformidade-legal)
+    - [2. Estrutura de dados: Lotes e o campo `originalAcquisitionDate`](#2-estrutura-de-dados-lotes-e-o-campo-originalacquisitiondate)
+    - [3. Tratamento por tipo de transação](#3-tratamento-por-tipo-de-transação)
+      - [3.1. `deposit`](#31-deposit)
+      - [➤ Caso 1: Compra com FIAT (`tag: 'buy'`)](#-caso-1-compra-com-fiat-tag-buy)
+      - [➤ Caso 2: Rendimento passivo (`tag: 'staking'`)](#-caso-2-rendimento-passivo-tag-staking)
+      - [3.2. `withdrawal`](#32-withdrawal)
+      - [Caso seja **alienação para algo não-cripto** (`fiatValue > 0`):](#caso-seja-alienação-para-algo-não-cripto-fiatvalue--0)
+      - [Caso seja **transferência** (`tag = 'transfer'` e `fiatValue` = `null`):](#caso-seja-transferência-tag--transfer-e-fiatvalue--null)
+      - [➤ Caso 1: Venda para FIAT (`fiatValue > 0`, `tag: 'sell'`)](#-caso-1-venda-para-fiat-fiatvalue--0-tag-sell)
+      - [➤ Caso 2: Venda para FIAT com taxa em cripto](#-caso-2-venda-para-fiat-com-taxa-em-cripto)
+      - [➤ Caso 3: Transferência entre entidades com taxa (`tag: 'transfer'`, `fiatValue = null`)](#-caso-3-transferência-entre-entidades-com-taxa-tag-transfer-fiatvalue--null)
+      - [3.3. `trade` (Permuta cripto-cripto)](#33-trade-permuta-cripto-cripto)
+      - [➤ Caso 1: Permuta simples (BTC → ETH)](#-caso-1-permuta-simples-btc--eth)
+      - [➤ Caso 2: Permuta com múltiplos ativos (BTC → ETH + SOL)](#-caso-2-permuta-com-múltiplos-ativos-btc--eth--sol)
+    - [4. Tratamento das taxas](#4-tratamento-das-taxas)
+      - [4.1. Taxa paga em FIAT](#41-taxa-paga-em-fiat)
+      - [4.2. Taxa paga em cripto](#42-taxa-paga-em-cripto)
+      - [Dupla entrada fiscal aplicável apenas quando deve ser:](#dupla-entrada-fiscal-aplicável-apenas-quando-deve-ser)
+      - [➤ Caso 1: Taxa paga em FIAT](#-caso-1-taxa-paga-em-fiat)
+      - [➤ Caso 2: Taxa paga em cripto](#-caso-2-taxa-paga-em-cripto)
+    - [5. Tratamento fiscal de NFT](#5-tratamento-fiscal-de-nft)
+      - [5.1 O que é NFT?](#51-o-que-é-nft)
+      - [5.2. Enquadramento fiscal de NFT em Portugal (CIRS)](#52-enquadramento-fiscal-de-nft-em-portugal-cirs)
+      - [➤ Caso 1: Compra de NFT com FIAT](#-caso-1-compra-de-nft-com-fiat)
+      - [➤ Caso 2: Venda de NFT por FIAT](#-caso-2-venda-de-nft-por-fiat)
+      - [➤ Caso 3: Permuta NFT-NFT](#-caso-3-permuta-nft-nft)
+    - [6. Tratamento fiscal de DeFi](#6-tratamento-fiscal-de-defi)
+      - [6.1. O que é DeFi?](#61-o-que-é-defi)
+      - [Exemplos comuns de DeFi:](#exemplos-comuns-de-defi)
+      - [6.2. Enquadramento fiscal de DeFi em Portugal (CIRS)](#62-enquadramento-fiscal-de-defi-em-portugal-cirs)
+      - [6.3 Princípios aplicáveis ao DeFi:](#63-princípios-aplicáveis-ao-defi)
+      - [6.4. Como implementar DeFi no algoritmo](#64-como-implementar-defi-no-algoritmo)
+      - [➤ Caso 1: Staking / Yield Farming / Recompensas](#-caso-1-staking--yield-farming--recompensas)
+      - [➤ Caso 2: Fornecimento de liquidez (Liquidity Pool)](#-caso-2-fornecimento-de-liquidez-liquidity-pool)
+      - [➤ Caso 3: Retirada de liquidez (Withdrawal de LP)](#-caso-3-retirada-de-liquidez-withdrawal-de-lp)
+      - [➤ Caso 4: Taxas em DeFi (gas fees)](#-caso-4-taxas-em-defi-gas-fees)
+    - [7. Sumário final](#7-sumário-final)
+    - [8. Fluxograma das transações](#8-fluxograma-das-transações)
+  - [🤝 Como Contribuir](#-como-contribuir)
+  - [📄 Licença](#-licença)
 
 ---
 
@@ -169,7 +192,7 @@ Inclui **qualquer alienação para algo não-cripto**, como:
 
 Aciona `_calculateFifoForSale` na entidade de origem.
 
-Para cada lote consumido: `**data de aquisição efetiva = originalAcquisitionDate ?? acquisitionDate**`
+Para cada lote consumido: **`data de aquisição efetiva = originalAcquisitionDate ?? acquisitionDate`**
 
 **Regra de Tributação:**
 1.  Se `isSecurityToken == true`: **Sempre Tributável** (28% ou englobamento).
@@ -327,7 +350,7 @@ A taxa é uma **micro-alienação** do ativo usado para pagá-la.
 Valor de realização:
 
 1. **Venda para FIAT:**  
-   Usa o **preço implícito** da venda: `**valor = fiatValue / fromAmount**`
+   Usa o **preço implícito** da venda: **`valor = fiatValue / fromAmount`**
 
 2. **Permuta ou transferência:**  
    Usa `feeFiatValue`, introduzido pelo utilizador.
@@ -377,7 +400,8 @@ NFT significa Non-Fungible Token, em português: Token Não Fungível.
 **Não fungível** = Único e irrepetível.
 Diferente de moedas ou criptomoedas (como Bitcoin ou Ethereum), que são fungíveis.
 Um NFT é único - não pode ser trocado por outro igual.
-Exemplo:
+
+**Exemplo:**
 - Um Bitcoin = outro Bitcoin → fungível.
 - Um NFT de uma obra de arte digital = só existe um → não fungível.
 
