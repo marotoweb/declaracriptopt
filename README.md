@@ -166,12 +166,15 @@ Um depósito é sempre uma **aquisição** que cria um novo lote:
 - Entidade: Ledger (ou Exchange)
 - Ativo: ETH
 - Quantidade: 0.05 (Recompensa típica mensal para um staking médio)
-- Valor de Mercado na data: 150,00€ (3.000,00€ por ETH)
+- Valor de mercado unitário na data: 3.000,00€
+
+**Cálculo Interno do Algoritmo:**
+- Valor Total a Declarar = 0.05 × 3.000,00€ = **150,00€**
 
 **Resultado:**
 - Cria novo lote:
   - `acquisitionDate = 2024-03-10`
-  - `costPerUnit = 3.000,00€` (Valor de mercado unitário, NÃO zero)
+  - `costPerUnit = 3.000,00€` (Valor de mercado unitário)
   - `amount = 0.05`
   - `originalAcquisitionDate = null`
 - *Ação Fiscal:* Declarar **150,00€** como rendimento Categoria E no IRS de 2024.
