@@ -20,9 +20,7 @@ Este algoritmo é uma ferramenta de cálculo baseada numa interpretação lógic
 
 ### Índice
 
-- [Documento Técnico: Um algoritmo aberto para a fiscalidade de criptoativos em Portugal](#documento-técnico-um-algoritmo-aberto-para-a-fiscalidade-de-criptoativos-em-portugal)
-    - [⚠️ Aviso Legal e Limitações (Leitura Obrigatória)](#️-aviso-legal-e-limitações-leitura-obrigatória)
-    - [Índice](#índice)
+  - [Índice](#índice)
   - [1. Objetivo do projeto](#1-objetivo-do-projeto)
   - [2. Arquitetura do algoritmo (v1.4)](#2-arquitetura-do-algoritmo-v14)
     - [1. Visão geral e conformidade legal](#1-visão-geral-e-conformidade-legal)
