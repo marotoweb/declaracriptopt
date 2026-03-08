@@ -109,8 +109,8 @@ O motor opera sobre cinco princípios fundamentais:
    *   **Custo para Mais-Valias:** O `cost basis` é o valor de mercado no dia da receção (não zero), para evitar dupla tributação na venda futura.
 
 5. **Distinção Security Tokens vs. Criptoativos Comuns:**
-   *   **Criptoativos Comuns (ex: BTC, ETH):** Isentos de imposto se detidos por >365 dias.
-   *   **Security Tokens (Valores Mobiliários):** **Nunca isentos**. Sempre tributados à taxa de 28% (ou englobamento), independentemente do tempo de detenção.
+   *   **Criptoativos Comuns (Valores não mobiliários ex: BTC, ETH):** Isentos de imposto se detidos por >365 dias.
+   *   **Security Tokens (Valores mobiliários):** **Nunca isentos**. Sempre tributados à taxa de 28% (ou englobamento), independentemente do tempo de detenção.
 
 ---
 
