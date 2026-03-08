@@ -13,9 +13,8 @@ Este algoritmo é uma ferramenta de cálculo baseada numa interpretação lógic
     *   *Comportamento do Algoritmo:* Para simplificar o rastreamento, o algoritmo regista estes eventos com `custo = valor de mercado na data da receção`. 
     *   *Ação do Utilizador:* Deve garantir que o valor desses rendimentos foi declarado no **Anexo E** do IRS do ano correspondente à receção. Na venda futura, o algoritmo calculará a mais-valia (Categoria G) apenas sobre a valorização posterior à receção, evitando a dupla tributação.
 3.  **Anexos do IRS (G vs. J):** O cálculo da mais-valia é universal, mas o local de declaração depende da entidade:
-    *   **Entidades Estrangeiras** (Binance, Coinbase, Ledger, Metamask, etc.): Preencher no **Anexo J**.
-    *   **Entidades Nacionais** (Raro em cripto): Preencher no **Anexo G**.
-
+    *   **Entidades Estrangeiras (Non-PT):** Preencher no **Anexo J**. Inclui **TODAS** as exchanges internacionais (Binance, Coinbase, Kraken) e **TODAS** as carteiras self-custody (Ledger, Trezor, Metamask, Trust Wallet), pois não são entidades portuguesas.
+    *   **Entidades Nacionais (PT):** Preencher no **Anexo G**. Apenas se a custódia for feita por uma entidade licenciada sediada em Portugal (extremamente raro).
 ---
 
 ### Índice
@@ -116,6 +115,18 @@ O motor opera sobre cinco princípios fundamentais:
 
 O sistema utiliza uma estrutura de pilhas FIFO por entidade: um `Map<Entity, Map<Asset, List<Lot>>>`.
 
+#### Definição de Entidade
+Cada entidade (carteira ou exchange) deve ser criada com os seguintes atributos:
+*   **`name`**: Nome da entidade (ex: "Binance", "Ledger Nano X").
+*   **`jurisdiction`**: `'PT'` | `'Non-PT'`.
+    *   Se `'PT'` → Relatório para **Anexo G**.
+    *   Se `'Non-PT'` → Relatório para **Anexo J**.
+
+> **Regra Crítica para Carteiras Self-Custody:**
+> Carteiras frias (Hardware Wallets como Ledger, Trezor) e carteiras quentes (Software Wallets como Metamask, Trust Wallet, Phantom) são **SEMPRE consideradas `Non-PT`**.
+> *   **Motivo:** Não existe uma entidade intermediária sediada em Portugal a custodiar os ativos; o utilizador detém as chaves privadas numa rede descentralizada global.
+> *   **Ação:** Ao criar uma entidade do tipo "Wallet Pessoal", defina automaticamente `jurisdiction: 'Non-PT'`. O relatório gerado será para o **Anexo J**.
+#### Estrutura do Lote (`Lot`)
 Cada `Lot` deve ter:
 
 *   **`acquisitionDate`**: Data da operação atual (ou da transferência).
@@ -124,8 +135,7 @@ Cada `Lot` deve ter:
 *   **`originalAcquisitionDate`** (opcional): Data da compra original (crucial para a regra dos 365 dias).
 *   **`isSecurityToken`** (boolean): Define se o ativo está sujeito a tributação obrigatória (sem isenção de 365 dias).
 
->**📝 Nota:** Para que serve `originalAcquisitionDate`?   
->Para preservar a data real de aquisição de um lote que foi comprado numa entidade **A** e posteriormente transferido para **B**. Sem este campo, o algoritmo poderia reiniciar incorretamente o contador dos **365 dias** ao receber o ativo noutra entidade.
+>**📝 Nota:** O campo `originalAcquisitionDate` preserva a data de compra original quando um ativo é transferido entre entidades, impedindo o reinício incorreto do contador dos 365 dias.
 
 ---
 
@@ -137,9 +147,9 @@ Um depósito é sempre uma **aquisição** que cria um novo lote:
 
 *   **tag: '`buy`':** `costPerUnit` = `fiatValue`, `acquisitionDate` = data da transação.
 *   **tag: '`staking`', '`airdrop`', '`interest`', '`rewards`':** 
-    *   `costPerUnit` = **Valor de Mercado em EUR no dia da receção**.
+    *   `costPerUnit` = **Preço de mercado unitário em EUR no dia da receção**.
     *   `acquisitionDate` = data da transação.
-    *   *Nota Fiscal:* Este valor deve ser declarado no Anexo E (Categoria E) do IRS desse ano.
+    *   *Nota Fiscal:* O valor total (`amount` × `costPerUnit`) deve ser declarado no Anexo E (Categoria E) do IRS desse ano.
 *   **`originalAcquisitionDate`** = `null`.
 
 #### ➤ Caso 1: Compra com FIAT (`tag: 'buy'`)
@@ -576,7 +586,8 @@ O **Código do IRS não distingue explicitamente entre DeFi e CeFi**, ou seja, *
 - **Transferências entre entidades:** evento neutro, preserva data e custo original.
 - **Permutas:** evento neutro - o novo ativo tem como custo o valor de aquisição do ativo entregue e **reinicia a contagem dos 365 dias**.
 - **Taxas:** separa lógica entre FIAT e cripto. Taxas em cripto são micro-alienações.
-- **Relatórios:** Identificar claramente se o output é para **Anexo G** (Nacional) ou **Anexo J** (Estrangeiro).
+- **Relatórios:** Gerados conforme `jurisdiction` da entidade (Anexo G para PT, Anexo J para Non-PT).
+
 
 ---
 
