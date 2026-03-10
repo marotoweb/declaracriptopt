@@ -13,8 +13,8 @@ Este algoritmo é uma ferramenta de cálculo baseada numa interpretação lógic
     *   *Comportamento do Algoritmo:* Para simplificar o rastreamento, o algoritmo regista estes eventos com `custo = valor de mercado na data da receção`. 
     *   *Ação do Utilizador:* Deve garantir que o valor desses rendimentos foi declarado no **Anexo E** do IRS do ano correspondente à receção. Na venda futura, o algoritmo calculará a mais-valia (Categoria G) apenas sobre a valorização posterior à receção, evitando a dupla tributação.
 3.  **Anexos do IRS (G vs. J):** O cálculo da mais-valia é universal, mas o local de declaração depende da entidade:
-    *   **Entidades Estrangeiras (Non-PT):** Preencher no **Anexo J**. Inclui **TODAS** as exchanges internacionais (Binance, Coinbase, Kraken) e **TODAS** as carteiras self-custody (Ledger, Trezor, Metamask, Trust Wallet), pois não são entidades portuguesas.
-    *   **Entidades Nacionais (PT):** Preencher no **Anexo G**. Apenas se a custódia for feita por uma entidade licenciada sediada em Portugal (extremamente raro).
+    *   **Entidades Estrangeiras:** Preencher no **Anexo J**. Inclui **TODAS** as exchanges internacionais (Binance, Coinbase, Kraken) e **TODAS** as carteiras self-custody (Ledger, Trezor, Metamask, Trust Wallet), pois não são entidades portuguesas.
+    *   **Entidades Nacionais:** Preencher no **Anexo G**. Apenas se a custódia for feita por uma entidade licenciada sediada em Portugal (extremamente raro).
 ---
 
 ### Índice
@@ -117,15 +117,17 @@ O sistema utiliza uma estrutura de pilhas FIFO por entidade: um `Map<Entity, Map
 
 #### Definição de Entidade
 Cada entidade (carteira ou exchange) deve ser criada com os seguintes atributos:
-*   **`name`**: Nome da entidade (ex: "Binance", "Ledger Nano X").
-*   **`jurisdiction`**: `'PT'` | `'Non-PT'`.
-    *   Se `'PT'` → Relatório para **Anexo G**.
-    *   Se `'Non-PT'` → Relatório para **Anexo J**.
+*   **`name`**: Nome dado pelo utilizador à carteira (ex: "Binance", "Ledger Nano X").
+*   **`type`**: O tipo de carteira. Ex: 'Exchange', 'Cold Wallet', 'Hot Wallet', 'Other'.
+*   **`creationDate`**: Data em que a carteira foi criada.
+*   **`isNational`**: `'true'` | `'false'`.
+    *   Se `'isNational = true'` → Relatório para **Anexo G**.
+    *   Se `'isNational = false'` → Relatório para **Anexo J**.
 
 > **Regra Crítica para Carteiras Self-Custody:**
-> Carteiras frias (Hardware Wallets como Ledger, Trezor) e carteiras quentes (Software Wallets como Metamask, Trust Wallet, Phantom) são **SEMPRE consideradas `Non-PT`**.
+> Carteiras frias (Hardware Wallets como Ledger, Trezor) e carteiras quentes (Software Wallets como Metamask, Trust Wallet, Phantom) são **SEMPRE consideradas `isNational = false`**.
 > *   **Motivo:** Não existe uma entidade intermediária sediada em Portugal a custodiar os ativos; o utilizador detém as chaves privadas numa rede descentralizada global.
-> *   **Ação:** Ao criar uma entidade do tipo "Wallet Pessoal", defina automaticamente `jurisdiction: 'Non-PT'`. O relatório gerado será para o **Anexo J**.
+> *   **Ação:** Ao criar uma entidade do tipo "Wallet Pessoal", defina automaticamente `isNational: 'false'`. O relatório gerado será para o **Anexo J**.
 #### Estrutura do Lote (`Lot`)
 Cada `Lot` deve ter:
 
@@ -586,7 +588,7 @@ O **Código do IRS não distingue explicitamente entre DeFi e CeFi**, ou seja, *
 - **Transferências entre entidades:** evento neutro, preserva data e custo original.
 - **Permutas:** evento neutro - o novo ativo tem como custo o valor de aquisição do ativo entregue e **reinicia a contagem dos 365 dias**.
 - **Taxas:** separa lógica entre FIAT e cripto. Taxas em cripto são micro-alienações.
-- **Relatórios:** Gerados conforme `jurisdiction` da entidade (Anexo G para PT, Anexo J para Non-PT).
+- **Relatórios:** Gerados conforme `isNational` da entidade (Anexo G para verdadeiro, Anexo J para falso).
 
 
 ---
