@@ -100,7 +100,7 @@ O motor opera sobre cinco princípios fundamentais:
    O novo ativo é considerado uma **nova aquisição**, com **valor de aquisição igual ao valor de aquisição do ativo entregue**, e nova data da permuta. Este valor e nova data servirão como base para o cálculo de futuras mais-valias.
    *Nota:* A contagem dos 365 dias reinicia para o novo ativo recebido.
 
-4. **Rendimentos em cripto (Staking/Airdrop):**  
+4. **Rendimentos em cripto (Staking/Airdrop/Rewords/Interest):**  
    São tratados como **aquisições ao valor de mercado na data da receção**.
    *   **Fiscalidade:** Devem ser declarados como Rendimentos de Capitais (Categoria E) no ano da receção (taxa 28%).
    *   **Custo para Mais-Valias:** O `cost basis` é o valor de mercado no dia da receção (não zero), para evitar dupla tributação na venda futura.
