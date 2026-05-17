@@ -6,20 +6,21 @@
 
 ### ⚠️ Aviso legal e limitações (leitura obrigatória)
 
-Este algoritmo é uma ferramenta de cálculo baseada numa interpretação lógica do Código do IRS. No entanto, existem nuances legais críticas que exigem intervenção manual do utilizador:
+Este algoritmo é uma ferramenta de cálculo baseada numa interpretação lógica do Código do IRS e nas orientações dos informativos fiscais vigentes. No entanto, existem nuances legais críticas que exigem intervenção manual do utilizador:
 
 1. ***Security tokens* (valores mobiliários):** O algoritmo assume por defeito que os ativos **NÃO** são valores mobiliários. Se o criptoativo representar uma participação financeira, dívida ou direito a dividendos (ex: *tokens* de *equity*, *bonds* tokenizados), a **isenção de 365 dias NÃO se aplica**. Estes ativos são sempre tributados (Categoria G), independentemente do tempo de detenção. O utilizador deve assinalar manualmente estes ativos como `isSecurityToken: true`.
 2. ***Staking* e rendimentos em cripto:** De acordo com o entendimento do regime fiscal português, os rendimentos gerados e pagos diretamente em criptoativos (como recompensas de *staking*, *lending*, *airdrops* ou *yield farming*) beneficiam de um regime de **suspensão de tributação**.
     * **Quando se aplica?** Aplica-se no exato momento em que recebes os *tokens* na tua carteira. Como recebeste ativos digitais e não moeda fiduciária (Euros), a AT "congela" a exigência do imposto. Não há qualquer tributação imediata ou obrigação de declarar.
     * **Como o algoritmo trata isto?** Para refletir esta suspensão, o algoritmo regista estas entradas com um **`custo de aquisição = 0,00€`** (custo zero), iniciando aí a contagem do prazo de detenção de 365 dias.
-    * **Quando termina a suspensão?** A suspensão cessa no momento em que realizas uma **alienação onerosa para moeda *fiat*** (venda por Euros, Dólares, etc.) ou compras bens/serviços com esses *tokens*. Nesse instante, geras liquidez real e o imposto é devido na **Categoria G (mais-valias)** sobre 100% do valor da venda (já que o teu custo guardado foi zero), a menos que o ativo tenha sido detido por 365 dias ou mais, caso em que fica legalmente excluído de tributação.
-3. **Matriz de anexos da declaração de IRS:** O cálculo da mais-valia baseia-se na regra *FIFO*, e o destino de exportação do relatório segue estritamente a estrutura e instruções dos formulários oficiais da Autoridade Tributária:
+    * **Quando termina a suspensão?** A suspensão cessa no momento em que realizas uma **alienação onerosa para moeda fiat** (venda por Euros, Dólares, etc.) ou compras bens/serviços com esses *tokens*. Nesse instante, geras liquidez real e o imposto é devido na **Categoria G (mais-valias)** sobre 100% do valor da venda (já que o teu custo guardado foi zero), a menos que o ativo tenha sido detido por 365 dias ou mais, caso em que fica legalmente excluído de tributação.
+3. **Exclusão de NFT:** Conforme detalhado nas orientações doutrinárias e informativos fiscais especializados (como o Informativo Fiscal da APECA), as operações e ganhos associados a NFT (ativos não fungíveis) encontram-se **excluídos de tributação** na categoria de criptoativos. O algoritmo ignora o cálculo de mais-valias sobre estes itens para efeitos de imposto, tratando-os como bens digitais não sujeitos a esta moldura fiscal.
+4. **Matriz de anexos da declaração de IRS:** O cálculo da mais-valia baseia-se na regra *FIFO*, e o destino de exportação do relatório segue estritamente a estrutura e instruções dos formulários oficiais da Autoridade Tributária, cruzando a natureza do ativo, o prazo de detenção e a jurisdição da entidade:
     * **Curto prazo (< 365 dias) - Tributáveis (taxa autónoma de 28%):**
         * Se a operação ocorreu no estrangeiro ou *self-custody* (`isNational: false`): Deve ser declarada detalhadamente no **Anexo J, Quadro 9.4A**.
         * Se a operação ocorreu através de um intermediário nacional (`isNational: true`): Deve ser declarada no **Anexo G, Quadro 18A**.
     * **Longo prazo (>= 365 dias) - Não sujeitas a tributação:**
         * Independentemente de estarem em carteiras privadas (*self-custody*), *exchanges* internacionais ou corretoras nacionais, os ganhos com criptoativos comuns detidos por mais de um ano estão excluídos de tributação. Devem ser declarados na totalidade no **Anexo G1, Quadro 7** (mais-valias não sujeitas a tributação).
-4. **Exclusão de atividade profissional (Categoria B / IRC):** Este algoritmo abrange **única e exclusivamente a gestão de património privado (Categoria G - mais-valias de particulares)**. Se o utilizador exercer uma atividade comercial ou profissional de compra e venda de criptoativos, mineração em escala industrial, ou se as transações forem efetuadas em nome de uma pessoa coletiva (empresa), os rendimentos enquadram-se na **Categoria B (regime simplificado ou contabilidade organizada)** ou em sede de **IRC**. Nestes cenários, aplicam-se regras de determinação de lucro e taxas de tributação totalmente distintas, estando fora do âmbito deste algoritmo.
+5. **Exclusão de atividade profissional (Categoria B / IRC):** Este algoritmo abrange **única e exclusivamente a gestão de património privado (Categoria G - mais-valias de particulares)**. Se o utilizador exercer uma atividade comercial ou profissional de compra e venda de criptoativos, mineração em escala industrial, ou se as transações forem efetuadas em nome de uma pessoa coletiva (empresa), os rendimentos enquadram-se na **Categoria B (regime simplificado ou contabilidade organizada)** ou em sede de **IRC**. Nestes cenários, aplicam-se regras de determinação de lucro e taxas de tributação totalmente distintas, estando fora do âmbito deste algoritmo.
 
 ---
 
@@ -52,9 +53,6 @@ Este algoritmo é uma ferramenta de cálculo baseada numa interpretação lógic
     - [5. Tratamento fiscal de NFT](#5-tratamento-fiscal-de-nft)
       - [5.1 O que é NFT?](#51-o-que-é-nft)
       - [5.2. Enquadramento fiscal de NFT em Portugal (CIRS)](#52-enquadramento-fiscal-de-nft-em-portugal-cirs)
-      - [➤ Caso 1: compra de NFT com FIAT](#-caso-1-compra-de-nft-com-fiat)
-      - [➤ Caso 2: venda de NFT por FIAT](#-caso-2-venda-de-nft-por-fiat)
-      - [➤ Caso 3: permuta NFT-NFT](#-caso-3-permuta-nft-nft)
     - [6. Tratamento fiscal de DeFi](#6-tratamento-fiscal-de-defi)
       - [6.1. O que é DeFi?](#61-o-que-é-defi)
       - [Exemplos comuns de DeFi:](#exemplos-comuns-de-defi)
@@ -146,9 +144,8 @@ Cada `Lot` deve ter:
 #### 3.1. `deposit`
 
 Um depósito é sempre uma **aquisição** que cria um novo lote:
-
-* **tag: '`buy`':** `costPerUnit` = `fiatValue`, `acquisitionDate` = data da transação.
-* **tag: '`staking`', '`airdrop`', '`interest`', '`rewards`':**
+* **tag: 'buy':** `costPerUnit` = `fiatValue`, `acquisitionDate` = data da transação.
+* **tag: 'staking', 'airdrop', 'interest', 'rewards':**
     * `costPerUnit` = **0,00€** (suspensão de tributação).
     * `acquisitionDate` = data da transação (início da contagem dos 365 dias).
 * **`originalAcquisitionDate`** = `null`.
@@ -172,7 +169,7 @@ Um depósito é sempre uma **aquisição** que cria um novo lote:
 #### ➤ Caso 2: rendimento passivo (`tag: 'staking'`)
 **Exemplo:**
 - Data: 2024-03-10
-- Entidade: Ledger (ou Exchange)
+- Entidade: Ledger (ou *exchange*)
 - Ativo: ETH
 - Quantidade: 0.05 
 
@@ -195,7 +192,7 @@ Inclui **qualquer alienação para algo não-cripto**, como:
 * **FIAT**
 * **NFT**
 * **Compra de bens ou serviços**
-* **Pagamentos com cartões que gaste a sua cripto**
+* **Pagamentos com cartões que gastem a sua cripto**
 
 #### Caso seja **alienação para algo não-cripto** (`fiatValue > 0`):
 
@@ -233,7 +230,7 @@ A data da transferência `acquisitionDate` **não influencia os 365 dias**.
 - Valor em FIAT: 30.000€
 - Custo do lote consumido (FIFO): 0.5 × 30.000€ = 15.000€
 - Data de aquisição efetiva: 2023-01-15
-- Dias detidos: 624 dias → **Isento** (se não foi Security Token)
+- Dias detidos: 624 dias → **Isento** (se não for *security token*)
 
 **Cálculo:**
 - Mais-valia = 30.000€ - 15.000€ = **15.000€**
@@ -395,13 +392,14 @@ Valor de realização:
 - Total mais-valia = 15.000€ + 30€ = **15.030€**
 - IRS = 15.030€ × 28% = **4.208,40€**
 
-> **📝 Nota sobre taxas em transferências:** Même que a transferência entre entidades do mesmo titular seja neutra fiscalmente, a taxa de rede paga em cripto é uma micro-alienação — e deve ser apurada separadamente para manter a precisão dos custos nos lotes.
+> **📝 Nota sobre taxas em transferências:** Mesmo que a transferência entre entidades do mesmo titular seja neutra fiscalmente, a taxa de rede paga em cripto é uma micro-alienação — e deve ser apurada separadamente para manter a precisão dos custos nos lotes.
 
 ---
 
 ### 5. Tratamento fiscal de NFT
+
 #### 5.1 O que é NFT?
-NFT significa Non-Fungible Token, em português: Token Não Fungível.
+NFT significa *Non-Fungible Token*, em português: *Token* Não Fungível.
 
 **Não fungível** = único e irrepetível.
 Diferente de moedas ou criptomoedas (como Bitcoin ou Ethereum), que são fungíveis. Um NFT é único - não pode ser trocado por outro igual.
@@ -411,98 +409,41 @@ Diferente de moedas ou criptomoedas (como Bitcoin ou Ethereum), que são fungív
 - Um NFT de uma obra de arte digital = só existe um → não fungível.
 
 #### 5.2. Enquadramento fiscal de NFT em Portugal (CIRS)
-Para efeitos do Código do IRS, NFT são tratados como criptoativos.
+Para efeitos do Código do IRS, e suportado pelas orientações doutrinárias recentes (como as divulgadas pela APECA), os NFT possuem uma **exclusão expressa de tributação** na categoria de criptoativos, por carecerem da característica de fungibilidade exigida pela redação da lei.
 
-**As regras são exatamente as mesmas:**
-* Compra de NFT com FIAT → aquisição normal.
-* Compra de NFT com cripto → permuta neutra (Art. 10.º, n.º 20).
-* Venda de NFT por FIAT, cripto, outro NFT ou serviços → alienação tributável se < 365 dias (e se não for considerado atividade profissional).
-* Permuta NFT-NFT → neutra; novo NFT recebe novo custo = custo do ativo entregue e nova data.
-* Airdrops/recebimentos gratuitos de NFT → custo = **0,00€** (suspensão de tributação).
+* **Comportamento do algoritmo:** Transações identificadas como NFT não originam apuramento de mais-valias tributáveis, poupando a sua inclusão nos quadros de reporte fiscal de mais-valias padrão de criptoativos.
 
-#### ➤ Caso 1: compra de NFT com FIAT
-**Exemplo:**
-- Data: 2024-05-01
-- Entidade: OpenSea
-- Ativo: NFT-123
-- Quantidade: 1
-- Valor em FIAT: 500€
-
-**Resultado:**
-- Cria novo lote:
-  - `acquisitionDate = 2024-05-01`
-  - `costPerUnit = 500€`
-  - `amount = 1`
-  - `isSecurityToken = false`
 
 ---
 
-#### ➤ Caso 2: venda de NFT por FIAT
-**Exemplo:**
-- Data: 2025-01-10
-- Entidade: OpenSea
-- Ativo: NFT-123
-- Quantidade: 1
-- Valor em FIAT: 800€
-- Custo: 500€
-- Dias detidos: 254 dias → **Tributável**
+### 6. Tratamento fiscal de _DeFi_
 
-**Cálculo:**
-- Mais-valia = 800€ - 500€ = **300€**
-- IRS = 300€ × 28% = **84€**
+#### 6.1. O que é _DeFi_?
+***DeFi* (*Decentralized Finance*)** = Finanças Descentralizadas. São aplicações financeiras construídas em *blockchains* que não dependem de intermediários tradicionais.
 
----
+#### Exemplos comuns de _DeFi_:
+- ***Staking* (delegar *tokens* para validar redes)**
+- ***Lending* & *Borrowing* (emprestar ou pedir emprestado cripto)**
+- ***Liquidity pools* (fornecer liquidez em _exchanges_ descentralizadas como Uniswap)**
+- ***Yield farming* (ganhar recompensas por fornecer liquidez)**
+- ***Stablecoins* (USDC, DAI, etc.)**
 
-#### ➤ Caso 3: permuta NFT-NFT
-**Exemplo:**
-- Data: 2024-09-01
-- Entidade: OpenSea
-- Ativo entregue: NFT-123 (custo: 500€)
-- Ativo recebido: NFT-456
+#### 6.2. Enquadramento fiscal de _DeFi_ em Portugal (CIRS)
+O **Código do IRS não distingue explicitamente entre _DeFi_ e _CeFi_**, ou seja, **o tratamento fiscal é o mesmo** para todos os ativos móveis.
 
-**Resultado:**
-- Cria novo lote de NFT-456:
-  - `acquisitionDate = 2024-09-01`
-  - `costPerUnit = 500€`
-  - `amount = 1`
-  - `originalAcquisitionDate = null`
-
-➡️ **Evento neutro fiscalmente**, não gera tributação imediata.
-
----
-
-### 6. Tratamento fiscal de DeFi
-#### 6.1. O que é DeFi?
-
-**DeFi (Decentralized Finance)** = Finanças Descentralizadas.
-São aplicações financeiras construídas em blockchains que não dependem de intermediários tradicionais.
-
-#### Exemplos comuns de DeFi:
-- **Staking** (delegar tokens para validar redes)
-- **Lending & Borrowing** (emprestar ou pedir emprestado cripto)
-- **Liquidity Pools** (fornecer liquidez em exchanges descentralizadas como Uniswap)
-- **Yield Farming** (ganhar recompensas por fornecer liquidez)
-- **Stablecoins** (USDC, DAI, etc.)
-- **Derivados e seguros descentralizados**
-
-#### 6.2. Enquadramento fiscal de DeFi em Portugal (CIRS)
-
-O **Código do IRS não distingue explicitamente entre DeFi e CeFi**, ou seja, **o tratamento fiscal é o mesmo** para todos os ativos móveis.
-
-#### 6.3 Princípios aplicáveis ao DeFi:
-
+#### 6.3 Princípios aplicáveis ao _DeFi_:
 1. **Rendimentos passivos (*staking*, *yield farming*):** São tratados sob o regime de **suspensão de tributação**. O custo de aquisição é **0,00€**.
-2. **Alienação de ativos *DeFi* (venda, troca, saque):** Mais-valia calculada com FIFO.
-3. **Permutas DeFi (ex.: ETH → *LP token*):** Neutras fiscalmente (Art. 10.º, n.º 20).
-4. **Taxas em DeFi (*gas fees*):** Tratadas como micro-alienações se pagas em cripto.
+2. **Alienação de ativos _DeFi_ (venda, troca, saque):** Mais-valia calculada com *FIFO*.
+3. **Permutas _DeFi_ (ex.: ETH → *LP token*):** Neutras fiscalmente (Art. 10.º, n.º 20).
+4. **Taxas em _DeFi_ (*gas fees*):** Tratadas como micro-alienações se pagas em cripto.
 5. **Isenção após 365 dias:** Aplicável apenas a criptoativos não-mobiliários.
 
-#### 6.4. Como implementar DeFi no algoritmo
+#### 6.4. Como implementar _DeFi_ no algoritmo
 
 #### ➤ Caso 1: *staking* / *yield farming* / recompensas
 **Exemplo:**
 - Data: 2024-06-15
-- Entidade: Uniswap (DeFi)
+- Entidade: Uniswap (*DeFi*)
 - Ativo: USDC
 - Quantidade: 100
 - Tipo: `deposit`, Tag: `defi`
@@ -568,13 +509,26 @@ O **Código do IRS não distingue explicitamente entre DeFi e CeFi**, ou seja, *
 
 ### 7. Sumário final
 
-- **Depósitos:** criam novos lotes com custo real (compra) ou **custo zero** (rendimentos em cripto).
-- **Alienações para FIAT, NFT, bens, serviços:** tributáveis se detidos menos de 365 dias (e não forem Security Tokens); isentos se ≥ 365 dias.
-- **Security tokens:** **Sempre tributáveis**, sem isenção de tempo.
-- **Transferências entre entidades:** evento neutro, preserva data e custo original.
-- **Permutas:** evento neutro - o novo ativo tem como custo o valor de aquisição do ativo entregue e **reinicia a contagem dos 365 dias**.
-- **Taxas:** separa lógica entre FIAT e cripto. Taxas em cripto são micro-alienações.
-- **Relatórios:** gerados conforme `isNational` da entidade (Anexo G para verdadeiro, Anexo J para falso).
+- **Depósitos:** criam novos lotes com o custo real (no caso de uma compra) ou com **custo zero** (no caso de rendimentos passivos recebidos diretamente em criptoativos).
+- **Alienações para FIAT, bens ou serviços:** o enquadramento depende do tempo de detenção e da natureza do ativo:
+  - Se detidos por menos de 365 dias: são **tributáveis** (Categoria G).
+  - Se detidos por 365 dias ou mais: estão **excluídos de tributação** (exceto *security tokens*).
+- **Alienações de NFT:** de acordo com o enquadramento legal, os ganhos com NFT estão **totalmente excluídos de tributação** na categoria de criptoativos, por não partilharem da natureza fungível prevista na lei.
+- ***Security tokens*:** **Sempre tributáveis** (Categoria G), independentemente do tempo de detenção. Não beneficiam da isenção de longo prazo.
+- **Transferências entre entidades:** evento totalmente neutro que apenas altera o local de custódia (*self-custody* ou *exchanges*). Preserva a data e o custo de aquisição originais para o cálculo do *FIFO*.
+- **Permutas (*trades*):** evento fiscalmente neutro (Art. 10.º, n.º 20) - o novo ativo recebido herda o custo de aquisição proporcional do ativo entregue e **reinicia a contagem do prazo de 365 dias** para zero.
+- **Taxas (*gas fees*):** separa a lógica conforme a moeda de pagamento:
+  - Taxas pagas em fiat: reduzem o valor de realização / acrescem aos encargos dedutíveis da operação principal.
+  - Taxas pagas em criptoativos: são tratadas como micro-alienações autónomas do ativo usado para o pagamento.
+
+#### Matriz de exportação de relatórios (IRS)
+
+A geração de relatórios de exportação cruza a natureza do ativo, o prazo de detenção e a jurisdição da entidade para o preenchimento correto dos anexos da Autoridade Tributária:
+
+| Natureza do Ativo | Prazo de Detenção | Entidade Nacional (`isNational: true`) | Entidade Estrangeira / *Self-Custody* (`isNational: false`) |
+| :--- | :--- | :--- | :--- |
+| **Criptoativo Comum** (ex: BTC, ETH) | Curto Prazo (< 365 dias) | **Anexo G, Quadro 18A** | **Anexo J, Quadro 9.4A** |
+| **Criptoativo Comum** (ex: BTC, ETH) | Longo Prazo ($\ge$ 365 dias) | **Anexo G1, Quadro 7** | **Anexo G1, Quadro 7** |
 
 ---
 
