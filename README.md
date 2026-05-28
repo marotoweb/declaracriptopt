@@ -137,7 +137,8 @@ Cada entidade (carteira ou *exchange*) deve ser criada com os seguintes atributo
 
 O algoritmo calcula os seguintes estados implícitos no momento da transação:
 * **`fiscalEligibility`**: Determinado a partir do `countryCode`. Consulta uma tabela interna para classificar o país como cooperante (`COOPERATING`), não cooperante (`NON_COOPERATING` - paraísos fiscais da lista negra nacional) ou desconhecido. O estado desconhecido suspende o cálculo para obrigar à revisão e intervenção manual.
-* **Destino declarativo**: Determinado de forma dinâmica no processamento. Se `type` for 'Exchange' e `countryCode` for 'PT', as mais-valias de curto prazo seguem para o **Anexo G**. Se `type` for 'Exchange' e `countryCode` for diferente de 'PT' (ex: 'IE'), seguem para o **Anexo J**. Para carteiras pessoais (`type` igual a 'Cold Wallet' ou 'Hot Wallet'), o algoritmo assume por defeito o `countryCode` de residência do sujeito passivo (ex: 'PT') para efeitos de `fiscalEligibility`, mas encaminha sempre o curto prazo para o **Anexo J**, uma vez que a custódia não pertence a um intermediário financeiro nacional.
+* **Destino declarativo**: Determinado de forma dinâmica no processamento. Se `type` for 'Exchange' e `countryCode` for 'PT', as mais-valias de curto prazo seguem para o **Anexo G**. Se `type` for 'Exchange' e `countryCode` for diferente de 'PT' (ex: 'IE'), seguem para o **Anexo J**. Para carteiras pessoais ou DeFi (`type` igual a 'Cold Wallet' ou 'Hot Wallet'), o algoritmo assume por defeito o `countryCode` de residência do sujeito passivo (ex: 'PT') para efeitos de `fiscalEligibility`, mas encaminha sempre o curto prazo para o **Anexo J**, uma vez que a custódia não pertence a um intermediário financeiro nacional.
+
 
 #### Estrutura do lote (`Lot`)
 Cada `Lot` deve ter:
@@ -363,9 +364,10 @@ O fluxo lógico depende diretamente da elegibilidade da entidade detentora:
   - `originalAcquisitionDate = null`
 
 #### ➤ Caso 3: permuta com múltiplos ativos (BTC → ETH + SOL)
-> [!WARNING]
-> **TODO:** Validar qual a fiscalEligibility em DeFi para carteira de titular em Portugal
- 
+> [!NOTE]
+> No DeFi o ónus da prova cabe inteiramente ao contribuinte. A Autoridade Tributária (AT) não monitoriza de forma automática as suas wallets privadas ou protocolos descentralizados, pelo que é o titular quem tem de demonstrar a origem, o histórico e o tempo de detenção dos ativos para beneficiar das isenções fiscais.
+
+
 **Exemplo:**
 - Data: 2024-08-15
 - Entidade: Uniswap (type: 'Hot Wallet', countryCode: 'PT')
@@ -494,8 +496,6 @@ O Código do IRS não faz qualquer distinção operacional entre finanças desce
 5. **Isenção após 365 dias:** Aplicável apenas a criptoativos não-mobiliários.
 
 #### 6.4. Como implementar _DeFi_ no algoritmo
-> [!WARNING]
-> **TODO:** Validar qual a fiscalEligibility em DeFi para carteira de titular em Portugal
  
 Como os protocolos *DeFi* correm em contratos sem localização geográfica tradicional, o algoritmo determina a `fiscalEligibility` avaliando o `type` da carteira que assina a transação (`Cold/Hot Wallet`), herdando o país de residência fiscal do utilizador (ex: 'PT' = `COOPERATING`). No entanto, o encaminhamento declarativo de curto prazo é sempre remetido para o **Anexo J**, dada a ausência de intermediário financeiro nacional.
 
