@@ -1,57 +1,73 @@
 flowchart TD
-  A[Início: Transação de Cripto] --> B{Tipo de Transação?}
+    A[Início: Transação de Cripto] --> B{Tipo de Transação?}
 
-  B -->|Deposit<br>Compra| C[Cria novo Lot]
-  C --> C1{Tag?}
-  C1 -->|Buy| C2[CostPerUnit = fiatValue,<br> acquisitionDate = data da <br>transação]
-  C1 -->|Staking/Airdrop/Interest| C3[CostPerUnit = 0,00€<br>Suspensão de Tributação]
-  C1 -->|Defi| C4[CostPerUnit = 0,00€<br> se rendimento em cripto]
+    %% DEPÓSITOS
+    B -->|Deposit<br>Compra| C[Cria novo Lot]
+    C --> C1{Tag?}
+    C1 -->|Buy| C2[CostPerUnit = fiatValue,<br> acquisitionDate = data da <br>transação]
+    C1 -->|Staking/Airdrop/Interest| C3[CostPerUnit = 0,00€<br>Suspensão de Tributação]
+    C1 -->|DeFi| C4[CostPerUnit = 0,00€<br>Se rendimento em cripto]
 
-  B -->|Withdrawal<br>Alienação não-cripto| D[Evento Tributável?]
-  D --> D1{É Security Token?}
-  D1 -->|Sim| D2[Sempre Tributável<br> Sem isenção 365 dias]
-  D1 -->|Não| D3[Verificar Dias Detidos]
-  D3 -->|< 365 dias| D4[Tributável<br> Cat. G]
-  D3 -->|&gt= 365 dias| D5[Isento<br> Cat. G]
-  D2 & D4 & D5 --> D6[Apurar Mais-Valia FIFO<br> Usar originalAcquisitionDate]
+    %% RETIRADAS / VENDAS
+    B -->|Withdrawal<br>Alienação não-cripto| D[Evento Tributável]
+    D --> D0{Jurisdição Cooperante?}
+    D0 -->|Não| D2[Sempre Tributável<br>Isenção revogada pelo Art 10 n21]
+    D0 -->|Sim| D1{É Security Token?}
+    D1 -->|Sim| D2[Sempre Tributável<br> Sem isenção 365 dias]
+    D1 -->|Não| D3[Verificar Dias Detidos]
+    D3 -->|< 365 dias| D4[Tributável<br> Cat. G]
+    D3 -->|&gt= 365 dias| D5[Isento<br> Cat. G]
+    D2 & D4 & D5 --> D6[Apurar Mais-Valia FIFO<br> Encaminhar p/ Anexo conforme matriz]
 
-  B -->|Transfer/Transferência| E[Evento Fiscalmente Neutro]
-  E --> E1[Consumir Lot da<br> entidade de origem]
-  E1 --> E2[Criar novo Lot na<br> entidade de destino]
-  E2 --> E3[Preservar costPerUnit,<br> originalAcquisitionDate<br> e isSecurityToken]
+    %% TRANSFERÊNCIAS
+    B -->|Transfer/Transferência| E[Evento Fiscalmente Neutro]
+    E --> E1[Consumir Lot da<br> entidade de origem]
+    E1 --> E2[Criar novo Lot na<br> entidade de destino]
+    E2 --> E3[Preservar costPerUnit,<br> originalAcquisitionDate<br> e isSecurityToken]
 
-  B -->|Trade/Permuta| F["Evento Neutro<br> 'Art. 10.º, n.º 20'"]
-  F --> F1[Consumir Lot do ativo<br> entregue 'FIFO']
-  F1 --> F2[Criar novo Lot para ativo<br> recebido]
-  F2 --> F3[CostPerUnit <br>=<br> custo de aquisição<br> dos lotes entregues]
-  F3 --> F4[acquisitionDate <br>=<br> data da permuta<br> originalAcquisitionDate = null<br> Contador 365 dias REINICIA]
+    %% PERMUTAS / TRADES
+    B -->|Trade/Permuta| F0{Jurisdição Cooperante?}
+    F0 -->|Não| F_Tributavel[Revoga Neutralidade<br> Apura Mais-Valia Imediata Cat. G]
+    F0 -->|Sim| F["Evento Neutro<br> 'Art. 10.º, n.º 20'"]
+    F --> F1[Consumir Lot do ativo<br> entregue 'FIFO']
+    F1 --> F2[Criar novo Lot para ativo<br> recebido]
+    F2 --> F3[CostPerUnit <br>=<br> custo de aquisição<br> dos lotes entregues]
+    F3 --> F4[acquisitionDate <br>=<br> data da permuta<br> originalAcquisitionDate = null<br> Contador 365 dias REINICIA]
 
-  B -->|DeFi| G[Tratar como<br> staking, LP, ou troca]
-  G --> G1{Tipo de DeFi?}
-  G1 -->|Staking/Rewards| G2[CostPerUnit = 0,00€<br>Suspensão de Tributação]
-  G1 -->|LP/Permuta| G3[CostPerUnit = custo<br> dos ativos entregues<br> Reinicia 365 dias]
-  G1 -->|Withdrawal LP| G4[Alienação do LP Token<br> Calcular Mais-Valia FIFO]
+    %% DEFI NOMINAL
+    B -->|DeFi| G[Tratar como<br> staking, LP, ou troca]
+    G --> G1{Tipo de DeFi?}
+    G1 -->|Staking/Rewards| G2[CostPerUnit = 0,00€<br>Suspensão de Tributação]
+    G1 -->|LP/Permuta| G3[CostPerUnit = custo<br> dos ativos entregues<br> Reinicia 365 dias]
+    G1 -->|Withdrawal LP| G4[Alienação do LP Token<br> Calcular Mais-Valia FIFO]
 
-  %% Taxas
-  D6 --> H{Taxa Paga?}
-  E3 --> H
-  F4 --> H
-  G4 --> H
+    %% LÓGICA DE TAXAS (Encadeamento Global)
+    D6 --> H{Taxa Paga?}
+    E3 --> H
+    F4 --> H
+    F_Tributavel --> H
+    G2 --> H
+    G3 --> H
+    G4 --> H
 
-  H -->|FIAT| H1[Taxa reduz o valor de<br> realização / encargo]
-  H -->|CRYPTO| H2[Micro-alienação: apurar<br> mais/menos-valia da taxa]
-  H2 --> H3{Operação principal<br> tributável?}
-  H3 -->|Sim| H4[Somar taxa como encargo<br> da alienação principal]
-  H3 -->|Não| H5[Registar apenas a<br> micro-alienação da taxa]
+    H -->|FIAT| H1[Taxa reduz o valor de<br> realização / encargo]
+    H -->|CRYPTO| H2[Micro-alienação: apurar<br> mais/menos-valia da taxa]
+    H2 --> H3{Operação principal<br> tributável?}
+    H3 -->|Sim| H4[Somar taxa como encargo<br> da alienação principal]
+    H3 -->|Não| H5[Registar apenas a<br> micro-alienação da taxa]
 
-  style A fill:#f9f,stroke:#333,stroke-width:2px,color:#000
-  style B fill:#77f,stroke:#333,stroke-width:1px,color:#fff
-  style C fill:#cff,stroke:#333,stroke-width:1px,color:#000
-  style D fill:#f88,stroke:#333,stroke-width:1px,color:#000
-  style E fill:#cff,stroke:#333,stroke-width:1px,color:#000
-  style F fill:#cff,stroke:#333,stroke-width:1px,color:#000
-  style G fill:#bbf,stroke:#333,stroke-width:1px,color:#000
-  style H fill:#fffbcc,stroke:#333,stroke-width:1px,color:#000
-  style D1 fill:#ff9999,stroke:#333,stroke-width:2px,color:#000
-  style C1 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
-  style H3 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
+    %% ESTILIZAÇÃO DO GRAPH
+    style A fill:#f9f,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#77f,stroke:#333,stroke-width:1px,color:#fff
+    style C fill:#cff,stroke:#333,stroke-width:1px,color:#000
+    style D fill:#f88,stroke:#333,stroke-width:1px,color:#000
+    style E fill:#cff,stroke:#333,stroke-width:1px,color:#000
+    style F fill:#cff,stroke:#333,stroke-width:1px,color:#000
+    style F_Tributavel fill:#f88,stroke:#333,stroke-width:1px,color:#000
+    style G fill:#bbf,stroke:#333,stroke-width:1px,color:#000
+    style H fill:#fffbcc,stroke:#333,stroke-width:1px,color:#000
+    style D0 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
+    style D1 fill:#ff9999,stroke:#333,stroke-width:2px,color:#000
+    style F0 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
+    style C1 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
+    style H3 fill:#bbf,stroke:#333,stroke-width:1px,color:#000

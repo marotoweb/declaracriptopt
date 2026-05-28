@@ -1,6 +1,6 @@
 # Documento técnico: Um algoritmo aberto para a fiscalidade de criptoativos em Portugal
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.5-blue.svg)]()
+[![Version](https://img.shields.io/badge/version-1.5.3-blue.svg)]()
 
 ---
 
@@ -9,28 +9,38 @@
 Este algoritmo é uma ferramenta de cálculo baseada numa interpretação lógica do Código do IRS e nas orientações dos informativos fiscais vigentes. No entanto, existem nuances legais críticas que exigem intervenção manual do utilizador:
 
 1. ***Security tokens* (valores mobiliários):** O algoritmo assume por defeito que os ativos **NÃO** são valores mobiliários. Se o criptoativo representar uma participação financeira, dívida ou direito a dividendos (ex: *tokens* de *equity*, *bonds* tokenizados), a **isenção de 365 dias NÃO se aplica**. Estes ativos são sempre tributados (Categoria G), independentemente do tempo de detenção. O utilizador deve assinalar manualmente estes ativos como `isSecurityToken: true`.
+   
 2. ***Staking* e rendimentos em cripto:** De acordo com o entendimento do regime fiscal português, os rendimentos gerados e pagos diretamente em criptoativos (como recompensas de *staking*, *lending*, *airdrops* ou *yield farming*) beneficiam de um regime de **suspensão de tributação**.
-    * **Quando se aplica?** Aplica-se no exato momento em que recebes os *tokens* na tua carteira. Como recebeste ativos digitais e não moeda fiduciária (Euros), a AT "congela" a exigência do imposto. Não há qualquer tributação imediata ou obrigação de declarar.
+    * **Quando se aplica?** Aplica-se no exato momento em que recebe os *tokens* na carteira. Como recebeu ativos digitais e não moeda fiduciária (Euros), a AT "congela" a exigência do imposto. Não há qualquer tributação imediata ou obrigação de declarar.
     * **Como o algoritmo trata isto?** Para refletir esta suspensão, o algoritmo regista estas entradas com um **`custo de aquisição = 0,00€`** (custo zero), iniciando aí a contagem do prazo de detenção de 365 dias.
-    * **Quando termina a suspensão?** A suspensão cessa no momento em que realizas uma **alienação onerosa para moeda fiat** (venda por Euros, Dólares, etc.) ou compras bens/serviços com esses *tokens*. Nesse instante, geras liquidez real e o imposto é devido na **Categoria G (mais-valias)** sobre 100% do valor da venda (já que o teu custo guardado foi zero), a menos que o ativo tenha sido detido por 365 dias ou mais, caso em que fica legalmente excluído de tributação.
-3. **Exclusão de NFT:** Conforme detalhado nas orientações doutrinárias e informativos fiscais especializados (como o Informativo Fiscal da APECA), as operações e ganhos associados a NFT (ativos não fungíveis) encontram-se **excluídos de tributação** na categoria de criptoativos. O algoritmo ignora o cálculo de mais-valias sobre estes itens para efeitos de imposto, tratando-os como bens digitais não sujeitos a esta moldura fiscal.
+    * **Quando termina a suspensão?** A suspensão cessa no momento em que realiza uma **alienação onerosa para moeda fiat** (venda por Euros, Dólares, etc.) ou compra bens/serviços com esses *tokens*. Nesse instante, gera liquidez real e o imposto é devido na **Categoria G (mais-valias)** sobre 100% do valor da venda (já que o custo guardado foi zero), a menos que o ativo tenha sido detido por 365 dias ou mais, caso em que fica legalmente excluído de tributação.
+  
+3. **Exclusão de NFT do Regime de Criptoativos (Mas sujeito a regras gerais):** Conforme o Código do IRS, os NFT (ativos não fungíveis) estão expressamente excluídos da definição jurídica e do regime fiscal específico dos *criptoativos*. 
+    * **O que o algoritmo faz:** O algoritmo ignora o cálculo de mais-valias sobre NFT *dentro do motor de cripto*, o que significa que eles **NÃO** beneficiam da isenção de 365 dias nem da neutralidade fiscal em permutas.
+    * **Impacto Fiscal Real:** A alienação onerosa de NFT pode ser tributável noutras sedes do Código do IRS. Se transacionados de forma esporádica por particulares, podem enquadrar-se nas regras gerais de mais-valias de bens móveis ou propriedade intelectual; se transacionados de forma recorrente, configuram rendimento comercial (Categoria B). O utilizador deve isolar estas operações para análise jurídica humana autónoma.
+  
 4. **Matriz de anexos da declaração de IRS:** O cálculo da mais-valia baseia-se na regra *FIFO*, e o destino de exportação do relatório segue estritamente a estrutura e instruções dos formulários oficiais da Autoridade Tributária, cruzando a natureza do ativo, o prazo de detenção e a jurisdição da entidade:
     * **Curto prazo (< 365 dias) - Tributáveis (taxa autónoma de 28%):**
-        * Se a operação ocorreu no estrangeiro ou *self-custody* (`isNational: false`): Deve ser declarada detalhadamente no **Anexo J, Quadro 9.4A**.
-        * Se a operação ocorreu através de um intermediário nacional (`isNational: true`): Deve ser declarada no **Anexo G, Quadro 18A**.
+        * Se a operação ocorreu através de uma corretora sediada em Portugal (`type: 'Exchange'` e `countryCode: 'PT'`): Deve ser declarada no **Anexo G, Quadro 18A**.
+        * Se a operação ocorreu no estrangeiro ou em carteiras privadas (`type: 'Exchange'` com `countryCode` diferente de 'PT', ou carteiras onde `type` seja 'Cold Wallet' ou 'Hot Wallet'): Deve ser declarada detalhadamente no **Anexo J, Quadro 9.4A**.
     * **Longo prazo (>= 365 dias) - Não sujeitas a tributação:**
-        * Independentemente de estarem em carteiras privadas (*self-custody*), *exchanges* internacionais ou corretoras nacionais, os ganhos com criptoativos comuns detidos por mais de um ano estão excluídos de tributação. Devem ser declarados na totalidade no **Anexo G1, Quadro 7** (mais-valias não sujeitas a tributação).
+        * Desde que operados em jurisdições cooperantes, os ganhos com criptoativos comuns detidos por mais de um ano estão excluídos de tributação. Devem ser declarados na totalidade no **Anexo G1, Quadro 7** (mais-valias não sujeitas a tributação).
+
 5. **Exclusão de atividade profissional (Categoria B / IRC):** Este algoritmo abrange **única e exclusivamente a gestão de património privado (Categoria G - mais-valias de particulares)**. Se o utilizador exercer uma atividade comercial ou profissional de compra e venda de criptoativos, mineração em escala industrial, ou se as transações forem efetuadas em nome de uma pessoa coletiva (empresa), os rendimentos enquadram-se na **Categoria B (regime simplificado ou contabilidade organizada)** ou em sede de **IRC**. Nestes cenários, aplicam-se regras de determinação de lucro e taxas de tributação totalmente distintas, estando fora do âmbito deste algoritmo.
 
 ---
 
 ### Índice
 
-  - [Índice](#índice)
+- [Documento técnico: Um algoritmo aberto para a fiscalidade de criptoativos em Portugal](#documento-técnico-um-algoritmo-aberto-para-a-fiscalidade-de-criptoativos-em-portugal)
+    - [⚠️ Aviso legal e limitações (leitura obrigatória)](#️-aviso-legal-e-limitações-leitura-obrigatória)
+    - [Índice](#índice)
   - [1. Objetivo do projeto](#1-objetivo-do-projeto)
-  - [2. Arquitetura do algoritmo (v1.5)](#2-arquitetura-do-algoritmo-v15)
-    - [1. Visão geral e conformidade legal](#1-visão-geral-e-conformidade-legal)
-    - [2. Estrutura de dados: lotes e o campo `originalAcquisitionDate`](#2-estrutura-de-dados-lotes-e-o-campo-originalacquisitiondate)
+  - [2. Arquitetura do algoritmo (v1.5.3)](#2-arquitetura-do-algoritmo-v153)
+    - [2.1. Visão geral e conformidade legal](#21-visão-geral-e-conformidade-legal)
+    - [2.2. Estrutura de dados: lotes e o campo `originalAcquisitionDate`](#22-estrutura-de-dados-lotes-e-o-campo-originalacquisitiondate)
+      - [Definição de entidade](#definição-de-entidade)
+      - [Estrutura do lote (`Lot`)](#estrutura-do-lote-lot)
     - [3. Tratamento por tipo de transação](#3-tratamento-por-tipo-de-transação)
       - [3.1. `deposit`](#31-deposit)
       - [➤ Caso 1: compra com FIAT (`tag: 'buy'`)](#-caso-1-compra-com-fiat-tag-buy)
@@ -38,14 +48,16 @@ Este algoritmo é uma ferramenta de cálculo baseada numa interpretação lógic
       - [3.2. `withdrawal`](#32-withdrawal)
       - [Caso seja **alienação para algo não-cripto** (`fiatValue > 0`):](#caso-seja-alienação-para-algo-não-cripto-fiatvalue--0)
       - [Caso seja **transferência** (`tag = 'transfer'` e `fiatValue` = `null`):](#caso-seja-transferência-tag--transfer-e-fiatvalue--null)
-      - [➤ Caso 1: venda para FIAT (`fiatValue > 0`, `tag: 'sell'`)](#-caso-1-venda-para-fiat-fiatvalue--0-tag-sell)
-      - [➤ Caso 2: venda para FIAT com taxa em cripto](#-caso-2-venda-para-fiat-com-taxa-em-cripto)
-      - [➤ Caso 3: transferência entre entidades com taxa (`tag: 'transfer'`, `fiatValue = null`)](#-caso-3-transferência-entre-entidades-com-taxa-tag-transfer-fiatvalue--null)
+      - [➤ Caso 1: venda para FIAT (`fiatValue > 0`, `tag: 'sell'`) em jurisdição cooperante](#-caso-1-venda-para-fiat-fiatvalue--0-tag-sell-em-jurisdição-cooperante)
+      - [➤ Caso 2: venda para FIAT numa jurisdição não cooperante (paraíso fiscal)](#-caso-2-venda-para-fiat-numa-jurisdição-não-cooperante-paraíso-fiscal)
+      - [➤ Caso 3: venda para FIAT com taxa em cripto](#-caso-3-venda-para-fiat-com-taxa-em-cripto)
+      - [➤ Caso 4: transferência entre entidades com taxa (`tag: 'transfer'`, `fiatValue = null`)](#-caso-4-transferência-entre-entidades-com-taxa-tag-transfer-fiatvalue--null)
       - [3.3. `trade` (permuta cripto-cripto)](#33-trade-permuta-cripto-cripto)
-      - [➤ Caso 1: permuta simples (BTC → ETH)](#-caso-1-permuta-simples-btc--eth)
-      - [➤ Caso 2: permuta com múltiplos ativos (BTC → ETH + SOL)](#-caso-2-permuta-com-múltiplos-ativos-btc--eth--sol)
+      - [➤ Caso 1: permuta simples em entidade cooperante (BTC → ETH)](#-caso-1-permuta-simples-em-entidade-cooperante-btc--eth)
+      - [➤ Caso 2: permuta simples em entidade não cooperante (BTC → ETH)](#-caso-2-permuta-simples-em-entidade-não-cooperante-btc--eth)
+      - [➤ Caso 3: permuta com múltiplos ativos (BTC → ETH + SOL)](#-caso-3-permuta-com-múltiplos-ativos-btc--eth--sol)
     - [4. Tratamento das taxas](#4-tratamento-das-taxas)
-      - [4.1. Taxa paga em FIAT](#41-taxa-paga-em-fiat)
+    - [4.1. Taxa paga em FIAT](#41-taxa-paga-em-fiat)
       - [4.2. Taxa paga em cripto](#42-taxa-paga-em-cripto)
       - [Dupla entrada fiscal aplicável apenas quando deve ser:](#dupla-entrada-fiscal-aplicável-apenas-quando-deve-ser)
       - [➤ Caso 1: taxa paga em FIAT](#-caso-1-taxa-paga-em-fiat)
@@ -53,19 +65,22 @@ Este algoritmo é uma ferramenta de cálculo baseada numa interpretação lógic
     - [5. Tratamento fiscal de NFT](#5-tratamento-fiscal-de-nft)
       - [5.1 O que é NFT?](#51-o-que-é-nft)
       - [5.2. Enquadramento fiscal de NFT em Portugal (CIRS)](#52-enquadramento-fiscal-de-nft-em-portugal-cirs)
-    - [6. Tratamento fiscal de DeFi](#6-tratamento-fiscal-de-defi)
-      - [6.1. O que é DeFi?](#61-o-que-é-defi)
-      - [Exemplos comuns de DeFi:](#exemplos-comuns-de-defi)
-      - [6.2. Enquadramento fiscal de DeFi em Portugal (CIRS)](#62-enquadramento-fiscal-de-defi-em-portugal-cirs)
-      - [6.3 Princípios aplicáveis ao DeFi:](#63-princípios-aplicáveis-ao-defi)
-      - [6.4. Como implementar DeFi no algoritmo](#64-como-implementar-defi-no-algoritmo)
-      - [➤ Caso 1: staking / yield farming / recompensas](#-caso-1-staking--yield-farming--recompensas)
-      - [➤ Caso 2: fornecimento de liquidez (liquidity pool)](#-caso-2-fornecimento-de-liquidez-liquidity-pool)
-      - [➤ Caso 3: retirada de liquidez (withdrawal de LP)](#-caso-3-retirada-de-liquidez-withdrawal-de-lp)
-      - [➤ Caso 4: taxas em DeFi (gas fees)](#-caso-4-taxas-em-defi-gas-fees)
+    - [5.3 Como o algoritmo trata os NFT](#53-como-o-algoritmo-trata-os-nft)
+  - [Em vez de aplicar a lógica FIFO de cripto, o motor suspende o processamento da linha e emite um aviso ao utilizador para reporte manual na categoria geral correspondente do IRS (ex: Categoria B se houver cariz profissional, ou mais-valia geral se aplicável), uma vez que a Autoridade Tributária analisa estes ativos pela sua substância (ex: se representa arte digital, propriedade, ou um direito de serviço).](#em-vez-de-aplicar-a-lógica-fifo-de-cripto-o-motor-suspende-o-processamento-da-linha-e-emite-um-aviso-ao-utilizador-para-reporte-manual-na-categoria-geral-correspondente-do-irs-ex-categoria-b-se-houver-cariz-profissional-ou-mais-valia-geral-se-aplicável-uma-vez-que-a-autoridade-tributária-analisa-estes-ativos-pela-sua-substância-ex-se-representa-arte-digital-propriedade-ou-um-direito-de-serviço)
+    - [6. Tratamento fiscal de _DeFi_](#6-tratamento-fiscal-de-defi)
+      - [6.1. O que é _DeFi_?](#61-o-que-é-defi)
+      - [Exemplos comuns de _DeFi_:](#exemplos-comuns-de-defi)
+      - [6.2. Enquadramento fiscal de _DeFi_ em Portugal (CIRS)](#62-enquadramento-fiscal-de-defi-em-portugal-cirs)
+      - [6.3 Princípios aplicáveis ao _DeFi_:](#63-princípios-aplicáveis-ao-defi)
+      - [6.4. Como implementar _DeFi_ no algoritmo](#64-como-implementar-defi-no-algoritmo)
+      - [➤ Caso 1: *staking* / *yield farming* / recompensas](#-caso-1-staking--yield-farming--recompensas)
+      - [➤ Caso 2: fornecimento de liquidez (*liquidity pool*)](#-caso-2-fornecimento-de-liquidez-liquidity-pool)
+      - [➤ Caso 3: retirada de liquidez (*withdrawal* de *LP*)](#-caso-3-retirada-de-liquidez-withdrawal-de-lp)
+      - [➤ Caso 4: taxas em _DeFi_ (*gas fees*)](#-caso-4-taxas-em-defi-gas-fees)
     - [7. Sumário final](#7-sumário-final)
+      - [Matriz de exportação de relatórios (IRS)](#matriz-de-exportação-de-relatórios-irs)
     - [8. Fluxograma das transações](#8-fluxograma-das-transações)
-  - [🤝 Como contribuir](#-como-contribuir)
+  - [🤝 Como Contribuir](#-como-contribuir)
   - [📄 Licença](#-licença)
 
 ---
@@ -83,59 +98,58 @@ O objetivo é criar e manter uma "fonte da verdade" lógica e transparente que p
 
 ---
 
-## 2. Arquitetura do algoritmo (v1.5)
+## 2. Arquitetura do algoritmo (v1.5.3)
 
-### 1. Visão geral e conformidade legal
+### 2.1. Visão geral e conformidade legal
 
 Este documento descreve um algoritmo fiscal, desenhado para estar em conformidade com o Código do IRS português, nomeadamente os Artigos **10.º** e **43.º**. A abordagem segue uma interpretação **conservadora, rigorosa e lógica** da lei.
 
-O motor opera sobre cinco princípios fundamentais:
+O motor opera sobre os seguintes princípios fundamentais:
 
 1. **FIFO por entidade depositária (Art. 43.º, n.º 9):** O método `FIFO (First-In, First-Out)` é aplicado individualmente a cada "entidade depositária" (ex.: *exchanges*). Todas as carteiras *self-custody* (frias, quentes, etc.) são tratadas como uma única entidade depositária para efeitos de cálculo, a menos que o utilizador opte por separá-las.
 
 2. **Transferência entre entidades é um evento neutro:** Transferir ativos entre entidades do mesmo titular é uma mera mudança de local de custódia. **Não é um evento tributável**. O lote transferido mantém **custo e data de aquisição originais**.
 
-3. **Neutralidade fiscal para permutas cripto-cripto (Art. 10.º, n.º 20):** Numa permuta cripto-cripto (ex.: BTC → ETH), a operação é uma alienação onerosa mas **não gera tributação** no momento da troca. O novo ativo é considerado uma **nova aquisição**, com **valor de aquisição igual ao valor de aquisição do ativo entregue**, e nova data da permuta. Este valor e nova data servirão como base para o cálculo de futuras mais-valias.
-   *Nota:* A contagem dos 365 dias reinicia para o novo ativo recebido.
+3. **Elegibilidade territorial e cláusula anti-abuso (Art. 10.º, n.º 21):** Os benefícios de neutralidade fiscal nas permutas e a isenção de mais-valias após 365 dias aplicam-se apenas se a entidade onde se realiza a operação ou a contraparte estiver sediada num país cooperante (Estados-Membros da UE, EEE ou países com convenção de dupla tributação ou acordo de troca de informações com Portugal). Se a jurisdição for considerada não cooperante (paraíso fiscal), todos os benefícios fiscais deixam de se aplicar.
 
-4. **Rendimentos em cripto (*staking*/*airdrop*/*rewards*/*interest*):** São tratados sob o regime de **suspensão de tributação**. O custo de aquisição é **Zero**.
+4. **Neutralidade fiscal condicionada para permutas cripto-cripto (Art. 10.º, n.º 20):** Numa permuta cripto-cripto (ex.: BTC → ETH) realizada numa entidade de jurisdição cooperante, a operação é uma alienação onerosa mas **não gera tributação** no momento da troca. O novo ativo é considerado uma **nova aquisição**, com **valor de aquisição igual ao valor de aquisição do ativo entregue**, e nova data da permuta. Este valor e nova data servirão como base para o cálculo de futuras mais-valias. A contagem dos 365 dias reinicia para o novo ativo recebido. Se ocorrer numa entidade não cooperante, a neutralidade fiscal é revogada e a mais-valia é apurada em euros imediatamente.
+
+5. **Rendimentos em cripto (*staking*/*airdrop*/*rewards*/*interest*):** São tratados sob o regime de **suspensão de tributação**. O custo de aquisição é **Zero**.
    * **Fiscalidade:** Não são tributados no momento da receção. A tributação ocorre apenas no momento da alienação onerosa (venda para Euros), sendo enquadrada na Categoria G (mais-valias).
    * **Custo para mais-valias:** O `cost basis` é **0,00€**, garantindo que o valor total da venda futura seja tributável ou isento de acordo com a regra dos 365 dias.
 
-5. **Distinção security tokens vs. criptoativos comuns:**
-   * **Criptoativos comuns (valores não mobiliários ex: BTC, ETH):** Isentos de imposto se detidos por >= 365 dias.
+6. **Distinção security tokens vs. criptoativos comuns:**
+   * **Criptoativos comuns (valores não mobiliários ex: BTC, ETH):** Isentos de imposto se detidos por >= 365 dias em jurisdições cooperantes.
    * **Security tokens (valores mobiliários):** **Nunca isentos**. Sempre tributados à taxa de 28% (ou englobamento), independentemente do tempo de detenção.
 
 ---
 
-### 2. Estrutura de dados: lotes e o campo `originalAcquisitionDate`
+### 2.2. Estrutura de dados: lotes e o campo `originalAcquisitionDate`
 
 O sistema utiliza uma estrutura de pilhas FIFO por entidade: um `Map<Entity, Map<Asset, List<Lot>>>`.
 
 #### Definição de entidade
 Cada entidade (carteira ou *exchange*) deve ser criada com os seguintes atributos:
-* **`name`**: Nome dado pelo utilizador à carteira (ex: "Binance", "Ledger Nano X").
+* **`name`**: Nome dado pelo utilizador à carteira (ex: "Kraken", "Ledger Nano X").
 * **`type`**: O tipo de carteira. Ex: '*Exchange*', '*Cold Wallet*', '*Hot Wallet*', '*Other*'.
 * **`creationDate`**: Data em que a carteira foi criada.
-* **`isNational`**: `'true'` | `'false'`.
-    * Se `'isNational = true'` → Relatório para **Anexo G**.
-    * Se `'isNational = false'` → Relatório para **Anexo J**.
+* **`countryCode`**: Código ISO-3166 alfa-2 do país onde a entidade está sediada (ex: 'PT', 'IE', 'KY').
 
-> **Regra crítica para carteiras *self-custody*:**
-> Carteiras frias (Hardware Wallets como Ledger, Trezor) e carteiras quentes (Software Wallets como Metamask, Trust Wallet, Phantom) são **SEMPRE consideradas `isNational = false`**.
-> * **Motivo:** Não existe uma entidade intermediária sediada em Portugal a custodiar os ativos; o utilizador detém as chaves privadas numa rede descentralizada global.
-> * **Ação:** Ao criar uma entidade do tipo "Wallet Pessoal", defina automaticamente `isNational: 'false'`. O relatório gerado será para o **Anexo J**.
+O algoritmo calcula os seguintes estados implícitos no momento da transação:
+* **`fiscalEligibility`**: Determinado a partir do `countryCode`. Consulta uma tabela interna para classificar o país como cooperante (`COOPERATING`), não cooperante (`NON_COOPERATING` - paraísos fiscais da lista negra nacional) ou desconhecido. O estado desconhecido suspende o cálculo para obrigar à revisão e intervenção manual.
+* **Destino declarativo**: Determinado de forma dinâmica no processamento. Se `type` for 'Exchange' e `countryCode` for 'PT', as mais-valias de curto prazo seguem para o **Anexo G**. Se `type` for 'Exchange' e `countryCode` for diferente de 'PT' (ex: 'IE'), seguem para o **Anexo J**. Para carteiras pessoais (`type` igual a 'Cold Wallet' ou 'Hot Wallet'), o algoritmo assume por defeito o `countryCode` de residência do sujeito passivo (ex: 'PT') para efeitos de `fiscalEligibility`, mas encaminha sempre o curto prazo para o **Anexo J**, uma vez que a custódia não pertence a um intermediário financeiro nacional.
 
 #### Estrutura do lote (`Lot`)
 Cada `Lot` deve ter:
 
-* **`acquisitionDate`**: Data da operação atual (ou da transferência).
+* **`acquisitionDate`**: Data da operação atual (causada por depósito, permuta ou transferência).
 * **`costPerUnit`**: Custo unitário em EUR.
 * **`amount`**: Quantidade do ativo.
 * **`originalAcquisitionDate`** (opcional): Data da compra original (crucial para a regra dos 365 dias).
 * **`isSecurityToken`** (boolean): Define se o ativo está sujeito a tributação obrigatória (sem isenção de 365 dias).
 
-> **📝 Nota:** O campo `originalAcquisitionDate` preserva a data de compra original quando um ativo é transferido entre entidades, impedindo o reinício incorreto do contador dos 365 dias.
+> [!NOTE]
+> O campo `originalAcquisitionDate` preserva a data de compra original quando um ativo é transferido entre entidades, impedindo o reinício incorreto do contador dos 365 dias.
 
 ---
 
@@ -145,7 +159,7 @@ Cada `Lot` deve ter:
 
 Um depósito é sempre uma **aquisição** que cria um novo lote:
 * **tag: 'buy':** `costPerUnit` = `fiatValue`, `acquisitionDate` = data da transação.
-* **tag: 'staking', 'airdrop', 'interest', 'rewards':**
+* **tag: 'staking', 'airdrop', 'interest', 'rewards', 'defi':**
     * `costPerUnit` = **0,00€** (suspensão de tributação).
     * `acquisitionDate` = data da transação (início da contagem dos 365 dias).
 * **`originalAcquisitionDate`** = `null`.
@@ -153,7 +167,7 @@ Um depósito é sempre uma **aquisição** que cria um novo lote:
 #### ➤ Caso 1: compra com FIAT (`tag: 'buy'`)
 **Exemplo:**
 - Data: 2023-01-15
-- Entidade: Binance
+- Entidade: Kraken (countryCode: 'IE')
 - Ativo: BTC
 - Quantidade: 1.0
 - Valor em FIAT: 30.000€
@@ -169,7 +183,7 @@ Um depósito é sempre uma **aquisição** que cria um novo lote:
 #### ➤ Caso 2: rendimento passivo (`tag: 'staking'`)
 **Exemplo:**
 - Data: 2024-03-10
-- Entidade: Ledger (ou *exchange*)
+- Entidade: Ledger (type: 'Cold Wallet')
 - Ativo: ETH
 - Quantidade: 0.05 
 
@@ -181,8 +195,8 @@ Um depósito é sempre uma **aquisição** que cria um novo lote:
   - `acquisitionDate = 2024-03-10`
   - `costPerUnit = 0,00€`
   - `amount = 0.05`
-  - `originalAcquisitionDate = 2024-03-10`
-- *Ação fiscal:* Nenhuma declaração imediata no momento da receção. A tributação ocorrerá apenas na venda deste lote por Euros ou outra moeda fiduciária. Se detido por mais de 365 dias, a venda total (lucro 100%) estará isenta.
+  - `originalAcquisitionDate = null`
+- *Ação fiscal:* Nenhuma declaração imediata no momento da receção. A tributação ocorrerá apenas na venda deste lote por Euros ou outra moeda fiduciária. Se detido por mais de 365 dias em ambiente cooperante, a venda total estará isenta.
 
 ---
 
@@ -198,15 +212,17 @@ Inclui **qualquer alienação para algo não-cripto**, como:
 
 ➡️ **Evento tributável.**
 
-Aciona `_calculateFifoForSale` na entidade de origem.
+Antes de calcular o prazo de detenção, o algoritmo valida o `fiscalEligibility` da entidade de origem. Aciona o `_calculateFifoForSale` na entidade correspondente.
 
 Para cada lote consumido: **`data de aquisição efetiva = originalAcquisitionDate ?? acquisitionDate`**
 
 **Regra de tributação:**
 1. Se `isSecurityToken == true`: **Sempre tributável** (28% ou englobamento).
 2. Se `isSecurityToken == false`:
-    * Dias detidos < 365: **Tributável** (28% ou englobamento).
-    * Dias detidos >= 365: **Isento**.
+    * Se `fiscalEligibility == NON_COOPERATING`: **Sempre tributável** (28% ou englobamento) por força do Artigo 10.º, n.º 21 do CIRS, revogando o benefício da isenção por prazo.
+    * Se `fiscalEligibility == COOPERATING`:
+        * Dias detidos < 365: **Tributável** (28% ou englobamento).
+        * Dias detidos >= 365: **Isento**.
 
 #### Caso seja **transferência** (`tag = 'transfer'` e `fiatValue` = `null`):
 
@@ -216,116 +232,153 @@ Para cada lote consumido: **`data de aquisição efetiva = originalAcquisitionDa
  2. Cria lotes na entidade de destino.  
  3. Preserva os seguintes dados inalterados:
     * `costPerUnit`
-    * `originalAcquisitionDate`
+    * `originalAcquisitionDate` (caso seja nulo, herda a `acquisitionDate` do lote consumido).
     * `isSecurityToken`
 
-A data da transferência `acquisitionDate` **não influencia os 365 dias**.
+A data da transferência em si (`acquisitionDate` do novo local) **não influencia os 365 dias**.
 
-#### ➤ Caso 1: venda para FIAT (`fiatValue > 0`, `tag: 'sell'`)
+#### ➤ Caso 1: venda para FIAT (`fiatValue > 0`, `tag: 'sell'`) em jurisdição cooperante
 **Exemplo:**
 - Data: 2024-10-01
-- Entidade: Binance (estrangeira) → **Anexo J**
+- Entidade: Kraken (countryCode: 'IE')
 - Ativo: BTC
 - Quantidade: 0.5
 - Valor em FIAT: 30.000€
 - Custo do lote consumido (FIFO): 0.5 × 30.000€ = 15.000€
 - Data de aquisição efetiva: 2023-01-15
-- Dias detidos: 624 dias → **Isento** (se não for *security token*)
+- Dias detidos: 624 dias → **Isento** (por ser cooperante, detido por >= 365 dias e não-security)
 
 **Cálculo:**
 - Mais-valia = 30.000€ - 15.000€ = **15.000€**
-- Tributação: **Isento** (≥ 365 dias e não-security token)
+- Tributação: **Isento** (Encaminhado para o **Anexo G1, Quadro 7**).
 
-#### ➤ Caso 2: venda para FIAT com taxa em cripto
+#### ➤ Caso 2: venda para FIAT numa jurisdição não cooperante (paraíso fiscal)
 **Exemplo:**
 - Data: 2024-10-01
-- Entidade: Binance
+- Entidade: CaymanExchange (countryCode: 'KY', fiscalEligibility: NON_COOPERATING)
 - Ativo: BTC
 - Quantidade: 0.5
 - Valor em FIAT: 30.000€
-- Taxa: 0.001 BTC (valor implícito: 60€)
-- Custo do lote consumido: 15.000€
-- Dias detidos: 180 dias → **Tributável**
+- Custo do lote consumido (FIFO): 15.000€
+- Data de aquisição efetiva: 2023-01-15
+- Dias detidos: 624 dias
+
+**Cálculo:**
+- Mais-valia = 30.000€ - 15.000€ = **15.000€**
+- Tributação: **Tributável** à taxa autónoma de 28% no **Anexo J, Quadro 9.4A**. A isenção dos 365 dias é revogada por força do Art. 10.º, n.º 21.
+
+#### ➤ Caso 3: venda para FIAT com taxa em cripto
+**Exemplo:**
+- Data: 2024-10-01
+- Entidade: Kraken (countryCode: 'IE')
+- Ativo: BTC
+- Quantidade: 0.5
+- Valor em FIAT: 30.000€
+- Taxa: 0.001 BTC (valor implícito de mercado: 60€)
+- Custo do lote consumido da taxa (FIFO): 30€
+- Dias detidos do lote principal e da taxa: 180 dias → **Tributáveis**
 
 **Cálculo:**
 - Mais-valia principal = 30.000€ - 15.000€ = **15.000€**
 - Micro-alienação da taxa:
-  - Custo da taxa = 0.001 × 30.000€ = 30€
+  - Custo da taxa = 30€
+  - Valor de realização da taxa = 0.001 × (30.000€ / 0.5) = 60€
   - Mais-valia da taxa = 60€ - 30€ = **30€**
-- Total mais-valia = 15.000€ + 30€ = **15.030€**
-- IRS devido = 15.030€ × 28% = **4.208,40€** (ou taxa progressiva se englobado)
+- Total mais-valia combinada = 15.000€ + 30€ = **15.030€**
+- Encaminhamento: Reportado na totalidade no **Anexo J, Quadro 9.4A**.
 
-#### ➤ Caso 3: transferência entre entidades com taxa (`tag: 'transfer'`, `fiatValue = null`)
+#### ➤ Caso 4: transferência entre entidades com taxa (`tag: 'transfer'`, `fiatValue = null`)
 **Exemplo:**
 - Data: 2024-06-01
-- Entidade de origem: Binance
-- Entidade de destino: Ledger
+- Entidade de origem: Kraken (countryCode: 'IE')
+- Entidade de destino: Ledger (type: 'Cold Wallet')
 - Ativo: BTC
 - Quantidade enviada: 0.5
-- Taxa: 0.001 BTC (valor implícito: 60€)
-- Custo do lote consumido: 0.5 × 30.000€ = 15.000€
-- Data de aquisição original: 2023-01-15
+- Taxa de rede cobrada: 0.001 BTC (valor de mercado implícito: 60€)
+- Custo do lote de taxa consumido (FIFO): 30€
+- Data de aquisição original do lote: 2024-01-15 (< 365 dias)
 
 **Resultado:**
-- **Micro-alienação da taxa:**
-  - Custo da taxa = 0.001 × 30.000€ = 30€
-  - Mais-valia da taxa = 60€ - 30€ = **30€** (tributável se o lote da taxa tiver < 365 dias)
-- **Cria novo lote na Ledger:**
+- **Micro-alienação da taxa:** É tratada como uma venda forçada de frações para pagar o serviço de rede.
+  - Custo da taxa = 30€
+  - Mais-valia gerada pela taxa = 60€ - 30€ = **30€** (Tributável no **Anexo J, Quadro 9.4A** por ter menos de 365 dias e decorrer na Kraken estrangeira).
+- **Criação do novo lote na Ledger:**
   - `acquisitionDate = 2024-06-01`
   - `costPerUnit = 30.000€`
-  - `amount = 0.499`
-  - `originalAcquisitionDate = 2023-01-15`
-  - `isSecurityToken` = (mantido do original)
+  - `amount = 0.499` (0.500 enviado - 0.001 de taxa)
+  - `originalAcquisitionDate = 2024-01-15`
+  - `isSecurityToken` = (preservado da origem)
 
-➡️ **Evento neutro fiscalmente** para o principal, mas a taxa é uma micro-alienação tributável.
+➡️ **O montante principal (0.499 BTC) é neutro fiscalmente**, mas a taxa gasta gera uma micro-alienação autónoma declarável.
 
 ---
 
 #### 3.3. `trade` (permuta cripto-cripto)
 
-➡️ **Evento neutro - Art. 10.º, n.º 20**
+O fluxo lógico depende diretamente da elegibilidade da entidade detentora:
 
- 1. Consome lotes do ativo entregue.
- 2. Cria novo lote do ativo recebido.
- 3. O custo do novo lote é: `costPerUnit` = custo de aquisição dos lotes entregues (proporcional).
- 4. `acquisitionDate` = data da permuta.
- 5. `originalAcquisitionDate` = `null` (O contador de 365 dias reinicia para o novo ativo).
- 6. `isSecurityToken` = (definido conforme a natureza do novo ativo recebido).
+* **Se `fiscalEligibility == COOPERATING`:** ➡️ **Evento neutro - Art. 10.º, n.º 20**
+   1. Consome lotes do ativo entregue através da pilha FIFO.
+   2. Cria um novo lote para o ativo recebido.
+   3. O custo do novo lote herda o custo histórico: `costPerUnit` = custo total de aquisição dos lotes entregues dividido pelo novo `amount`.
+   4. `acquisitionDate` = data da permuta atual.
+   5. `originalAcquisitionDate` = `null` (**O contador de 365 dias reinicia** para zero no novo ativo).
+   6. `isSecurityToken` = (mapeado de acordo com a natureza do novo ativo recebido).
+* **Se `fiscalEligibility == NON_COOPERATING`:** ➡️ **Evento tributável - Art. 10.º, n.º 21**
+   A neutralidade fiscal é completamente revogada. Ocorre o apuramento de mais-valias imediato em euros, calculando a diferença entre o valor de mercado atual do ativo entregue e o seu custo de aquisição. O ativo recebido entra na pilha com uma nova `acquisitionDate` e o seu `costPerUnit` atualizado ao preço de mercado.
 
-#### ➤ Caso 1: permuta simples (BTC → ETH)
+#### ➤ Caso 1: permuta simples em entidade cooperante (BTC → ETH)
 **Exemplo:**
 - Data: 2024-07-01
-- Entidade: Binance
-- Ativo entregue: BTC (0.5) - Custo total: 15.000€
+- Entidade: Kraken (countryCode: 'IE', COOPERATING)
+- Ativo entregue: BTC (0.5) - Custo histórico FIFO: 15.000€
 - Ativo recebido: ETH (0.3)
 
 **Resultado:**
-- Cria novo lote de ETH:
+- Cria novo lote de ETH na Kraken:
   - `acquisitionDate = 2024-07-01`
   - `costPerUnit = 15.000€ / 0.3 = 50.000€/ETH`
   - `amount = 0.3`
-  - `originalAcquisitionDate = null` (contador reinicia)
-  - `isSecurityToken = false` (assumindo ETH comum)
+  - `originalAcquisitionDate = null` (o relógio de 365 dias faz reset)
+  - `isSecurityToken = false`
 
-➡️ **Evento neutro fiscalmente**, não gera tributação imediata.
+➡️ **Evento  neutro fiscalmente**, não gerando qualquer registo ou obrigação declarativa imediata.
 
----
+#### ➤ Caso 2: permuta simples em entidade não cooperante (BTC → ETH)
+**Exemplo:**
+- Data: 2024-07-01
+- Entidade: CaymanExchange (countryCode: 'KY', NON_COOPERATING)
+- Ativo entregue: BTC (0.5) - Custo histórico FIFO: 15.000€
+- Ativo recebido: ETH (0.3)
+- Valor de mercado em Euros do BTC entregue no momento da troca: 25.000€
 
-#### ➤ Caso 2: permuta com múltiplos ativos (BTC → ETH + SOL)
+**Resultado:**
+- Revogação de neutralidade: Apuramento imediato de mais-valia comercial.
+  - Mais-valia = 25.000€ (valor de mercado de realização) - 15.000€ (custo) = **10.000€**
+- Ação: **Tributável** à taxa de 28% no **Anexo J, Quadro 9.4A**.
+- Cria novo lote de ETH na CaymanExchange:
+  - `acquisitionDate = 2024-07-01`
+  - `costPerUnit = 25.000€ / 0.3 = 83.333,33€/ETH`
+  - `amount = 0.3`
+  - `originalAcquisitionDate = null`
+
+#### ➤ Caso 3: permuta com múltiplos ativos (BTC → ETH + SOL)
+> [!WARNING]
+> **TODO:** Validar qual a fiscalEligibility em DeFi para carteira de titular em Portugal
+ 
 **Exemplo:**
 - Data: 2024-08-15
-- Entidade: Binance
-- Ativo entregue: BTC (1.0) - Custo total: 30.000€
+- Entidade: Uniswap (type: 'Hot Wallet', countryCode: 'PT')
+- Ativo entregue: BTC (1.0) - Custo histórico total: 30.000€
 - Ativos recebidos: ETH (0.3) + SOL (0.2)
-- Valor de mercado implícito no momento da permuta:
-  - ETH: 100€/unidade → 0.3 × 100€ = 30€ (75% do valor total)
-  - SOL: 50€/unidade → 0.2 × 50€ = 10€ (25% do valor total)
-  - Total: 40€ (valores relativos para distribuição de custo)
+- Valores de mercado proporcionais calculados no instante da troca:
+  - Fração ETH: Representa 75% do valor total da transação.
+  - Fração SOL: Representa 25% do valor total da transação.
 
-**Cálculo do custo proporcional:**
-- Custo total do BTC entregue: 30.000€
-- Custo do ETH = 75% × 30.000€ = **22.500€**
-- Custo do SOL = 25% × 30.000€ = **7.500€**
+**Cálculo do custo proporcional distribuído:**
+- Custo total do BTC entregue a fracionar: 30.000€
+- Custo atribuído ao ETH = 75% × 30.000€ = **22.500€**
+- Custo atribuído ao SOL = 25% × 30.000€ = **7.500€**
 
 **Resultado:**
 - Lote de ETH:
@@ -345,20 +398,17 @@ A data da transferência `acquisitionDate` **não influencia os 365 dias**.
 
 ### 4. Tratamento das taxas
 
-A lógica de tratamento de taxas é 100% offline e determinística. A nossa interpretação baseia-se na aplicação consistente dos princípios gerais de "alienação onerosa" (Art. 10.º) e "apuramento de mais-valias" (Art. 43.º).
+A lógica de tratamento de taxas é offline e determinística, aplicando os princípios gerais de "alienação onerosa" (Art. 10.º) e "apuramento de mais-valias" (Art. 43.º).
 
-#### 4.1. Taxa paga em FIAT
-
-➡️ **É apenas um encargo da alienação**, subtraído no cálculo da mais-valia.  
+### 4.1. Taxa paga em FIAT
+➡️ **É um encargo puro da alienação**, deduzido diretamente na fórmula da mais-valia.
 
 #### 4.2. Taxa paga em cripto
 
-A taxa é uma **micro-alienação** do ativo usado para pagá-la.
+A taxa é tratada como uma **micro-alienação** do criptoativo usado para liquidá-la.
 
-Valor de realização:
-
-1. **Venda para FIAT:** Usa o **preço implícito** da venda: **`valor = fiatValue / fromAmount`**
-
+Valor de realização da micro-alienação:
+1. **Venda para FIAT:** Herda o **preço implícito** da venda: **`valor = fiatValue / fromAmount`**
 2. **Permuta ou transferência:** Usa `feeFiatValue`, introduzido pelo utilizador.
 
 #### Dupla entrada fiscal aplicável apenas quando deve ser:
@@ -392,14 +442,15 @@ Valor de realização:
 - Total mais-valia = 15.000€ + 30€ = **15.030€**
 - IRS = 15.030€ × 28% = **4.208,40€**
 
-> **📝 Nota sobre taxas em transferências:** Mesmo que a transferência entre entidades do mesmo titular seja neutra fiscalmente, a taxa de rede paga em cripto é uma micro-alienação — e deve ser apurada separadamente para manter a precisão dos custos nos lotes.
+> [!NOTE]
+> **Taxas em transferências:** Mesmo que a transferência entre entidades do mesmo titular seja neutra fiscalmente, a taxa de rede paga em cripto é uma micro-alienação - e deve ser apurada separadamente para manter a precisão dos custos nos lotes.
 
 ---
 
 ### 5. Tratamento fiscal de NFT
 
 #### 5.1 O que é NFT?
-NFT significa *Non-Fungible Token*, em português: *Token* Não Fungível.
+NFT significa *Non-Fungible Token* (*Token* não fungível). Representa um certificado digital de propriedade sobre um ativo único, indivisível e não intermutável (ex.: arte digital, colecionáveis, registos de exclusividade).
 
 **Não fungível** = único e irrepetível.
 Diferente de moedas ou criptomoedas (como Bitcoin ou Ethereum), que são fungíveis. Um NFT é único - não pode ser trocado por outro igual.
@@ -409,18 +460,22 @@ Diferente de moedas ou criptomoedas (como Bitcoin ou Ethereum), que são fungív
 - Um NFT de uma obra de arte digital = só existe um → não fungível.
 
 #### 5.2. Enquadramento fiscal de NFT em Portugal (CIRS)
-Para efeitos do Código do IRS, e suportado pelas orientações doutrinárias recentes (como as divulgadas pela APECA), os NFT possuem uma **exclusão expressa de tributação** na categoria de criptoativos, por carecerem da característica de fungibilidade exigida pela redação da lei.
+Por força da exclusão legal da definição de criptoativos, as transações de NFT **não seguem o regime das criptomoedas**. Isto implica um tratamento severo pelo algoritmo:
 
-* **Comportamento do algoritmo:** Transações identificadas como NFT não originam apuramento de mais-valias tributáveis, poupando a sua inclusão nos quadros de reporte fiscal de mais-valias padrão de criptoativos.
+1. **Revogação de Isenções:** Não existe exclusão de tributação após 365 dias de detenção.
+2. **Permutas Tributáveis:** Trocar um NFT por outro (ou por ETH) não goza de neutralidade fiscal. É um evento de alienação imediato com apuramento de ganho em Euros baseado no valor de mercado.
 
+### 5.3 Como o algoritmo trata os NFT
+Para evitar cálculos errados e proteger o utilizador, o algoritmo implementa uma **"Flag de Bloqueio/Alerta"** (`assetType: 'NFT'`). 
 
+Em vez de aplicar a lógica FIFO de cripto, o motor suspende o processamento da linha e emite um aviso ao utilizador para reporte manual na categoria geral correspondente do IRS (ex: Categoria B se houver cariz profissional, ou mais-valia geral se aplicável), uma vez que a Autoridade Tributária analisa estes ativos pela sua substância (ex: se representa arte digital, propriedade, ou um direito de serviço).
 ---
 
 ### 6. Tratamento fiscal de _DeFi_
 
 #### 6.1. O que é _DeFi_?
-***DeFi* (*Decentralized Finance*)** = Finanças Descentralizadas. São aplicações financeiras construídas em *blockchains* que não dependem de intermediários tradicionais.
-
+*DeFi* (*Decentralized Finance*) engloba serviços financeiros (empréstimos, trocas automatizadas, derivados) executados diretamente através de *smart contracts* em redes *blockchain*, sem a presença de intermediários centralizados.
+ 
 #### Exemplos comuns de _DeFi_:
 - ***Staking* (delegar *tokens* para validar redes)**
 - ***Lending* & *Borrowing* (emprestar ou pedir emprestado cripto)**
@@ -429,7 +484,7 @@ Para efeitos do Código do IRS, e suportado pelas orientações doutrinárias re
 - ***Stablecoins* (USDC, DAI, etc.)**
 
 #### 6.2. Enquadramento fiscal de _DeFi_ em Portugal (CIRS)
-O **Código do IRS não distingue explicitamente entre _DeFi_ e _CeFi_**, ou seja, **o tratamento fiscal é o mesmo** para todos os ativos móveis.
+O Código do IRS não faz qualquer distinção operacional entre finanças descentralizadas (*DeFi*) ou centralizadas (*CeFi*). As regras gerais da Categoria G aplicam-se igualmente à natureza dos ativos movimentados.
 
 #### 6.3 Princípios aplicáveis ao _DeFi_:
 1. **Rendimentos passivos (*staking*, *yield farming*):** São tratados sob o regime de **suspensão de tributação**. O custo de aquisição é **0,00€**.
@@ -439,11 +494,15 @@ O **Código do IRS não distingue explicitamente entre _DeFi_ e _CeFi_**, ou sej
 5. **Isenção após 365 dias:** Aplicável apenas a criptoativos não-mobiliários.
 
 #### 6.4. Como implementar _DeFi_ no algoritmo
+> [!WARNING]
+> **TODO:** Validar qual a fiscalEligibility em DeFi para carteira de titular em Portugal
+ 
+Como os protocolos *DeFi* correm em contratos sem localização geográfica tradicional, o algoritmo determina a `fiscalEligibility` avaliando o `type` da carteira que assina a transação (`Cold/Hot Wallet`), herdando o país de residência fiscal do utilizador (ex: 'PT' = `COOPERATING`). No entanto, o encaminhamento declarativo de curto prazo é sempre remetido para o **Anexo J**, dada a ausência de intermediário financeiro nacional.
 
 #### ➤ Caso 1: *staking* / *yield farming* / recompensas
 **Exemplo:**
 - Data: 2024-06-15
-- Entidade: Uniswap (*DeFi*)
+- Entidade: Uniswap Protocol (`type: 'Hot Wallet'`)
 - Ativo: USDC
 - Quantidade: 100
 - Tipo: `deposit`, Tag: `defi`
@@ -453,7 +512,7 @@ O **Código do IRS não distingue explicitamente entre _DeFi_ e _CeFi_**, ou sej
   - `acquisitionDate = 2024-06-15`
   - `costPerUnit = 0,00€`
   - `amount = 100`
-  - `originalAcquisitionDate = 2024-06-15`
+  - `originalAcquisitionDate = null`
 - *Ação fiscal:* Nenhuma no momento da receção. A tributação ocorrerá apenas na venda por Euros (Categoria G).
 
 ---
@@ -463,7 +522,7 @@ O **Código do IRS não distingue explicitamente entre _DeFi_ e _CeFi_**, ou sej
 - Data: 2024-07-01
 - Entidade: Uniswap
 - Ativo entregue: ETH (0.5) + USDC (500)
-- Custo total dos ativos entregues: 0.5 × 3.000€ + 500€ = 2.000€
+- Custo histórico total dos lotes entregues: 0.5 × 3.000€ + 500€ = 2.000€
 - Ativo recebido: UNI-V2 LP Token (1.0)
 
 **Resultado:**
@@ -485,16 +544,18 @@ O **Código do IRS não distingue explicitamente entre _DeFi_ e _CeFi_**, ou sej
 - Quantidade: 1.0
 - Valor em FIAT (mercado): 2.500€
 - Custo do LP Token: 2.000€
-- Dias detidos: 193 dias → **Tributável**
+- Dias detidos: 193 dias (< 365 dias) → **Tributável**
 
 **Cálculo:**
 - Mais-valia = 2.500€ - 2.000€ = **500€**
 - IRS = 500€ × 28% = **140€**
-- *Nota:* Os ativos recebidos de volta (ETH, USDC) entram como novos lotes com custo igual ao seu valor de mercado no dia da retirada (2.500€ no total).
+> [!NOTE]
+> Os ativos recebidos de volta (ETH, USDC) entram como novos lotes com custo igual ao seu valor de mercado no dia da retirada (2.500€ no total).
+- **Ação:** Sendo curto prazo numa estrutura sem intermediário nacional, é direcionado para o **Anexo J, Quadro 9.4A**.
 
 ---
 
-#### ➤ Caso 4: taxas em DeFi (gas fees)
+#### ➤ Caso 4: taxas em _DeFi_ (*gas fees*)
 **Exemplo:**
 - Transação DeFi (ex.: staking)
 - Taxa paga em ETH: 0.005 ETH
@@ -509,15 +570,17 @@ O **Código do IRS não distingue explicitamente entre _DeFi_ e _CeFi_**, ou sej
 
 ### 7. Sumário final
 
-- **Depósitos:** criam novos lotes com o custo real (no caso de uma compra) ou com **custo zero** (no caso de rendimentos passivos recebidos diretamente em criptoativos).
-- **Alienações para FIAT, bens ou serviços:** o enquadramento depende do tempo de detenção e da natureza do ativo:
-  - Se detidos por menos de 365 dias: são **tributáveis** (Categoria G).
-  - Se detidos por 365 dias ou mais: estão **excluídos de tributação** (exceto *security tokens*).
-- **Alienações de NFT:** de acordo com o enquadramento legal, os ganhos com NFT estão **totalmente excluídos de tributação** na categoria de criptoativos, por não partilharem da natureza fungível prevista na lei.
-- ***Security tokens*:** **Sempre tributáveis** (Categoria G), independentemente do tempo de detenção. Não beneficiam da isenção de longo prazo.
-- **Transferências entre entidades:** evento totalmente neutro que apenas altera o local de custódia (*self-custody* ou *exchanges*). Preserva a data e o custo de aquisição originais para o cálculo do *FIFO*.
-- **Permutas (*trades*):** evento fiscalmente neutro (Art. 10.º, n.º 20) - o novo ativo recebido herda o custo de aquisição proporcional do ativo entregue e **reinicia a contagem do prazo de 365 dias** para zero.
-- **Taxas (*gas fees*):** separa a lógica conforme a moeda de pagamento:
+* **Depósitos:** criam novos lotes com o custo real (no caso de uma compra) ou com **custo zero** (no caso de rendimentos passivos recebidos diretamente em criptoativos).
+* **Alienações para FIAT, bens ou serviços:** Curto prazo (< 365 dias) é sempre tributado a 28%. Longo prazo (≥ 365 dias) em países cooperantes é isento. Transações em paraísos fiscais perdem o direito a isenção de longo prazo.
+  - Se operado em jurisdição cooperante: são **tributáveis** (Categoria G) se detidos por menos de 365 dias, e estão **excluídos de tributação** se detidos por 365 dias ou mais (exceto *security tokens*).
+  - Se operado em jurisdição não cooperante: Sempre tributável na Categoria G (28%).
+* **Alienações de NFT:** São tributados em Portugal, mas estão excluídos do regime especial de criptoativos.  Os ganhos obtidos com a sua venda enquadram-se nas regras gerais de mais-valias do IRS
+  - Vendas ocasionais (Categoria G)
+  - Atividade profissional (Categoria B)
+* ***Security tokens*:** **Sempre tributáveis** (Categoria G), independentemente do tempo de detenção. Não beneficiam da isenção de longo prazo.
+* **Transferências entre entidades:** evento totalmente neutro que apenas altera o local de custódia (*self-custody* ou *exchanges*). Preserva a data e o custo de aquisição originais para o cálculo do *FIFO*.
+* **Permutas (*trades*):** evento fiscalmente neutro (Art. 10.º, n.º 20) apenas se operado em entidades cooperantes - o novo ativo recebido herda o custo de aquisição proporcional do ativo entregue e **reinicia a contagem do prazo de 365 dias** para zero. Tornam-se tributáveis no momento da troca se efetuadas em entidades de paraísos fiscais.
+* **Taxas (*gas fees*):** separa a lógica conforme a moeda de pagamento:
   - Taxas pagas em fiat: reduzem o valor de realização / acrescem aos encargos dedutíveis da operação principal.
   - Taxas pagas em criptoativos: são tratadas como micro-alienações autónomas do ativo usado para o pagamento.
 
@@ -525,10 +588,12 @@ O **Código do IRS não distingue explicitamente entre _DeFi_ e _CeFi_**, ou sej
 
 A geração de relatórios de exportação cruza a natureza do ativo, o prazo de detenção e a jurisdição da entidade para o preenchimento correto dos anexos da Autoridade Tributária:
 
-| Natureza do Ativo | Prazo de Detenção | Entidade Nacional (`isNational: true`) | Entidade Estrangeira / *Self-Custody* (`isNational: false`) |
-| :--- | :--- | :--- | :--- |
-| **Criptoativo Comum** (ex: BTC, ETH) | Curto Prazo (< 365 dias) | **Anexo G, Quadro 18A** | **Anexo J, Quadro 9.4A** |
-| **Criptoativo Comum** (ex: BTC, ETH) | Longo Prazo ($\ge$ 365 dias) | **Anexo G1, Quadro 7** | **Anexo G1, Quadro 7** |
+| Natureza do ativo | Prazo de detenção | Entidade com sede em Portugal (`type: 'Exchange'`, `countryCode: 'PT'`) | Entidade estrangeira cooperante ou carteira pessoal (`type: 'Exchange'` com `countryCode` diferente de 'PT', ou carteiras 'Wallet') | Entidade não cooperante (Paraíso fiscal, `fiscalEligibility: NON_COOPERATING`) |
+| :--- | :--- | :--- | :--- | :--- |
+| **Criptoativo comum** | Curto Prazo (< 365 dias) | **Anexo G, Quadro 18A** (Tributável) | **Anexo J, Quadro 9.4A** (Tributável) | **Anexo J, Quadro 9.4A** (Tributável) |
+| **Criptoativo comum** | Longo Prazo (≥ 365 dias) | **Anexo G1, Quadro 7** (Isento) | **Anexo G1, Quadro 7** (Isento) | **Anexo J, Quadro 9.4A** (Tributável - Isenção revogada pelo Art 10 n21) |
+| ***Security Token*** | Qualquer Prazo | **Anexo G, Quadro 18A** (Tributável) | **Anexo J, Quadro 9.4A** (Tributável) | **Anexo J, Quadro 9.4A** (Tributável) |
+| **NFT** | Qualquer prazo | **Excluído** (Tributavel) | **Excluído** (Tributavel) | **Excluído** (Tributavel) |
 
 ---
 
@@ -536,62 +601,78 @@ A geração de relatórios de exportação cruza a natureza do ativo, o prazo de
 
 ```mermaid
 flowchart TD
-  A[Início: Transação de Cripto] --> B{Tipo de Transação?}
+    A[Início: Transação de Cripto] --> B{Tipo de Transação?}
 
-  B -->|Deposit<br>Compra| C[Cria novo Lot]
-  C --> C1{Tag?}
-  C1 -->|Buy| C2[CostPerUnit = fiatValue,<br> acquisitionDate = data da <br>transação]
-  C1 -->|Staking/Airdrop/Interest| C3[CostPerUnit = 0,00€<br>Suspensão de Tributação]
-  C1 -->|Defi| C4[CostPerUnit = 0,00€<br> se rendimento em cripto]
+    %% DEPÓSITOS
+    B -->|Deposit<br>Compra| C[Cria novo Lot]
+    C --> C1{Tag?}
+    C1 -->|Buy| C2[CostPerUnit = fiatValue,<br> acquisitionDate = data da <br>transação]
+    C1 -->|Staking/Airdrop/Interest| C3[CostPerUnit = 0,00€<br>Suspensão de Tributação]
+    C1 -->|DeFi| C4[CostPerUnit = 0,00€<br>Se rendimento em cripto]
 
-  B -->|Withdrawal<br>Alienação não-cripto| D[Evento Tributável?]
-  D --> D1{É Security Token?}
-  D1 -->|Sim| D2[Sempre Tributável<br> Sem isenção 365 dias]
-  D1 -->|Não| D3[Verificar Dias Detidos]
-  D3 -->|< 365 dias| D4[Tributável<br> Cat. G]
-  D3 -->|&gt= 365 dias| D5[Isento<br> Cat. G]
-  D2 & D4 & D5 --> D6[Apurar Mais-Valia FIFO<br> Usar originalAcquisitionDate]
+    %% RETIRADAS / VENDAS
+    B -->|Withdrawal<br>Alienação não-cripto| D[Evento Tributável]
+    D --> D0{Jurisdição Cooperante?}
+    D0 -->|Não| D2[Sempre Tributável<br>Isenção revogada pelo Art 10 n21]
+    D0 -->|Sim| D1{É Security Token?}
+    D1 -->|Sim| D2[Sempre Tributável<br> Sem isenção 365 dias]
+    D1 -->|Não| D3[Verificar Dias Detidos]
+    D3 -->|< 365 dias| D4[Tributável<br> Cat. G]
+    D3 -->|&gt= 365 dias| D5[Isento<br> Cat. G]
+    D2 & D4 & D5 --> D6[Apurar Mais-Valia FIFO<br> Encaminhar p/ Anexo conforme matriz]
 
-  B -->|Transfer/Transferência| E[Evento Fiscalmente Neutro]
-  E --> E1[Consumir Lot da<br> entidade de origem]
-  E1 --> E2[Criar novo Lot na<br> entidade de destino]
-  E2 --> E3[Preservar costPerUnit,<br> originalAcquisitionDate<br> e isSecurityToken]
+    %% TRANSFERÊNCIAS
+    B -->|Transfer/Transferência| E[Evento Fiscalmente Neutro]
+    E --> E1[Consumir Lot da<br> entidade de origem]
+    E1 --> E2[Criar novo Lot na<br> entidade de destino]
+    E2 --> E3[Preservar costPerUnit,<br> originalAcquisitionDate<br> e isSecurityToken]
 
-  B -->|Trade/Permuta| F["Evento Neutro<br> 'Art. 10.º, n.º 20'"]
-  F --> F1[Consumir Lot do ativo<br> entregue 'FIFO']
-  F1 --> F2[Criar novo Lot para ativo<br> recebido]
-  F2 --> F3[CostPerUnit <br>=<br> custo de aquisição<br> dos lotes entregues]
-  F3 --> F4[acquisitionDate <br>=<br> data da permuta<br> originalAcquisitionDate = null<br> Contador 365 dias REINICIA]
+    %% PERMUTAS / TRADES
+    B -->|Trade/Permuta| F0{Jurisdição Cooperante?}
+    F0 -->|Não| F_Tributavel[Revoga Neutralidade<br> Apura Mais-Valia Imediata Cat. G]
+    F0 -->|Sim| F["Evento Neutro<br> 'Art. 10.º, n.º 20'"]
+    F --> F1[Consumir Lot do ativo<br> entregue 'FIFO']
+    F1 --> F2[Criar novo Lot para ativo<br> recebido]
+    F2 --> F3[CostPerUnit <br>=<br> custo de aquisição<br> dos lotes entregues]
+    F3 --> F4[acquisitionDate <br>=<br> data da permuta<br> originalAcquisitionDate = null<br> Contador 365 dias REINICIA]
 
-  B -->|DeFi| G[Tratar como<br> staking, LP, ou troca]
-  G --> G1{Tipo de DeFi?}
-  G1 -->|Staking/Rewards| G2[CostPerUnit = 0,00€<br>Suspensão de Tributação]
-  G1 -->|LP/Permuta| G3[CostPerUnit = custo<br> dos ativos entregues<br> Reinicia 365 dias]
-  G1 -->|Withdrawal LP| G4[Alienação do LP Token<br> Calcular Mais-Valia FIFO]
+    %% DEFI NOMINAL
+    B -->|DeFi| G[Tratar como<br> staking, LP, ou troca]
+    G --> G1{Tipo de DeFi?}
+    G1 -->|Staking/Rewards| G2[CostPerUnit = 0,00€<br>Suspensão de Tributação]
+    G1 -->|LP/Permuta| G3[CostPerUnit = custo<br> dos ativos entregues<br> Reinicia 365 dias]
+    G1 -->|Withdrawal LP| G4[Alienação do LP Token<br> Calcular Mais-Valia FIFO]
 
-  %% Taxas
-  D6 --> H{Taxa Paga?}
-  E3 --> H
-  F4 --> H
-  G4 --> H
+    %% LÓGICA DE TAXAS (Encadeamento Global)
+    D6 --> H{Taxa Paga?}
+    E3 --> H
+    F4 --> H
+    F_Tributavel --> H
+    G2 --> H
+    G3 --> H
+    G4 --> H
 
-  H -->|FIAT| H1[Taxa reduz o valor de<br> realização / encargo]
-  H -->|CRYPTO| H2[Micro-alienação: apurar<br> mais/menos-valia da taxa]
-  H2 --> H3{Operação principal<br> tributável?}
-  H3 -->|Sim| H4[Somar taxa como encargo<br> da alienação principal]
-  H3 -->|Não| H5[Registar apenas a<br> micro-alienação da taxa]
+    H -->|FIAT| H1[Taxa reduz o valor de<br> realização / encargo]
+    H -->|CRYPTO| H2[Micro-alienação: apurar<br> mais/menos-valia da taxa]
+    H2 --> H3{Operação principal<br> tributável?}
+    H3 -->|Sim| H4[Somar taxa como encargo<br> da alienação principal]
+    H3 -->|Não| H5[Registar apenas a<br> micro-alienação da taxa]
 
-  style A fill:#f9f,stroke:#333,stroke-width:2px,color:#000
-  style B fill:#77f,stroke:#333,stroke-width:1px,color:#fff
-  style C fill:#cff,stroke:#333,stroke-width:1px,color:#000
-  style D fill:#f88,stroke:#333,stroke-width:1px,color:#000
-  style E fill:#cff,stroke:#333,stroke-width:1px,color:#000
-  style F fill:#cff,stroke:#333,stroke-width:1px,color:#000
-  style G fill:#bbf,stroke:#333,stroke-width:1px,color:#000
-  style H fill:#fffbcc,stroke:#333,stroke-width:1px,color:#000
-  style D1 fill:#ff9999,stroke:#333,stroke-width:2px,color:#000
-  style C1 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
-  style H3 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
+    %% ESTILIZAÇÃO DO GRAPH
+    style A fill:#f9f,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#77f,stroke:#333,stroke-width:1px,color:#fff
+    style C fill:#cff,stroke:#333,stroke-width:1px,color:#000
+    style D fill:#f88,stroke:#333,stroke-width:1px,color:#000
+    style E fill:#cff,stroke:#333,stroke-width:1px,color:#000
+    style F fill:#cff,stroke:#333,stroke-width:1px,color:#000
+    style F_Tributavel fill:#f88,stroke:#333,stroke-width:1px,color:#000
+    style G fill:#bbf,stroke:#333,stroke-width:1px,color:#000
+    style H fill:#fffbcc,stroke:#333,stroke-width:1px,color:#000
+    style D0 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
+    style D1 fill:#ff9999,stroke:#333,stroke-width:2px,color:#000
+    style F0 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
+    style C1 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
+    style H3 fill:#bbf,stroke:#333,stroke-width:1px,color:#000
 ```
 
 [Ver fluxograma](diagrams/fluxograma.mermaid.svg)
