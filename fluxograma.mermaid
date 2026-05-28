@@ -4,8 +4,8 @@ flowchart TD
   B -->|Deposit<br>Compra| C[Cria novo Lot]
   C --> C1{Tag?}
   C1 -->|Buy| C2[CostPerUnit = fiatValue,<br> acquisitionDate = data da <br>transação]
-  C1 -->|Staking/Airdrop/Interest| C3[CostPerUnit = Valor Mercado<br> no dia da receção<br> Declarar Cat. E]
-  C1 -->|Defi| C4[CostPerUnit = Valor Mercado<br> se rendimento<br> ou custo dos ativos<br> se LP]
+  C1 -->|Staking/Airdrop/Interest| C3[CostPerUnit = 0,00€<br>Suspensão de Tributação]
+  C1 -->|Defi| C4[CostPerUnit = 0,00€<br> se rendimento em cripto]
 
   B -->|Withdrawal<br>Alienação não-cripto| D[Evento Tributável?]
   D --> D1{É Security Token?}
@@ -28,7 +28,7 @@ flowchart TD
 
   B -->|DeFi| G[Tratar como<br> staking, LP, ou troca]
   G --> G1{Tipo de DeFi?}
-  G1 -->|Staking/Rewards| G2[CostPerUnit = Valor Mercado<br> Declarar Cat. E]
+  G1 -->|Staking/Rewards| G2[CostPerUnit = 0,00€<br>Suspensão de Tributação]
   G1 -->|LP/Permuta| G3[CostPerUnit = custo<br> dos ativos entregues<br> Reinicia 365 dias]
   G1 -->|Withdrawal LP| G4[Alienação do LP Token<br> Calcular Mais-Valia FIFO]
 
