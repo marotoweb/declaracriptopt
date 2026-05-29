@@ -465,9 +465,10 @@ Por força da exclusão legal da definição de criptoativos, as transações de
 2. **Permutas Tributáveis:** Trocar um NFT por outro (ou por ETH) não goza de neutralidade fiscal. É um evento de alienação imediato com apuramento de ganho em Euros baseado no valor de mercado.
 
 ### 5.3 Como o algoritmo trata os NFT
-Para evitar cálculos errados e proteger o utilizador, o algoritmo implementa uma **"Flag de Bloqueio/Alerta"** (`assetType: 'NFT'`). 
+Para evitar cálculos errados e proteger o utilizador, o algoritmo implementa uma **"Flag de Bloqueio/Alerta"** (`assetType: 'NFT'`).
 
 Em vez de aplicar a lógica FIFO de cripto, o motor suspende o processamento da linha e emite um aviso ao utilizador para reporte manual na categoria geral correspondente do IRS (ex: Categoria B se houver cariz profissional, ou mais-valia geral se aplicável), uma vez que a Autoridade Tributária analisa estes ativos pela sua substância (ex: se representa arte digital, propriedade, ou um direito de serviço).
+
 ---
 
 ### 6. Tratamento fiscal de _DeFi_
