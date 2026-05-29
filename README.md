@@ -78,8 +78,8 @@ Este algoritmo é uma ferramenta de cálculo baseada numa interpretação lógic
       - [➤ Caso 3: retirada de liquidez (*withdrawal* de *LP*)](#-caso-3-retirada-de-liquidez-withdrawal-de-lp)
       - [➤ Caso 4: taxas em _DeFi_ (*gas fees*)](#-caso-4-taxas-em-defi-gas-fees)
     - [7. Sumário final](#7-sumário-final)
-      - [Matriz de exportação de relatórios (IRS)](#matriz-de-exportação-de-relatórios-irs)
-    - [8. Fluxograma das transações](#8-fluxograma-das-transações)
+    - [8. Matriz de exportação de relatórios (IRS)](#matriz-de-exportação-de-relatórios-irs)
+    - [9. Fluxograma das transações](#8-fluxograma-das-transações)
   - [🤝 Como Contribuir](#-como-contribuir)
   - [📄 Licença](#-licença)
 
@@ -427,8 +427,6 @@ Valor de realização da micro-alienação:
 - Mais-valia = 30.000€ - 15.000€ - 50€ = **14.950€**
 - Se tributável (< 365 dias): IRS = 14.950€ × 28% = **4.186€**
 
----
-
 #### ➤ Caso 2: taxa paga em cripto
 **Exemplo:**
 - Venda de 0.5 BTC por 30.000€
@@ -516,8 +514,6 @@ Como os protocolos *DeFi* correm em contratos sem localização geográfica trad
   - `originalAcquisitionDate = null`
 - *Ação fiscal:* Nenhuma no momento da receção. A tributação ocorrerá apenas na venda por Euros (Categoria G).
 
----
-
 #### ➤ Caso 2: fornecimento de liquidez (*liquidity pool*)
 **Exemplo:**
 - Data: 2024-07-01
@@ -535,8 +531,6 @@ Como os protocolos *DeFi* correm em contratos sem localização geográfica trad
 
 ➡️ **Evento neutro fiscalmente**, permuta cripto-cripto.
 
----
-
 #### ➤ Caso 3: retirada de liquidez (*withdrawal* de *LP*)
 **Exemplo:**
 - Data: 2025-01-10
@@ -553,8 +547,6 @@ Como os protocolos *DeFi* correm em contratos sem localização geográfica trad
 > [!NOTE]
 > Os ativos recebidos de volta (ETH, USDC) entram como novos lotes com custo igual ao seu valor de mercado no dia da retirada (2.500€ no total).
 - **Ação:** Sendo curto prazo numa estrutura sem intermediário nacional, é direcionado para o **Anexo J, Quadro 9.4A**.
-
----
 
 #### ➤ Caso 4: taxas em _DeFi_ (*gas fees*)
 **Exemplo:**
@@ -585,7 +577,9 @@ Como os protocolos *DeFi* correm em contratos sem localização geográfica trad
   - Taxas pagas em fiat: reduzem o valor de realização / acrescem aos encargos dedutíveis da operação principal.
   - Taxas pagas em criptoativos: são tratadas como micro-alienações autónomas do ativo usado para o pagamento.
 
-#### Matriz de exportação de relatórios (IRS)
+---
+
+### 8. Matriz de exportação de relatórios (IRS)
 
 A geração de relatórios de exportação cruza a natureza do ativo, o prazo de detenção e a jurisdição da entidade para o preenchimento correto dos anexos da Autoridade Tributária:
 
@@ -598,7 +592,7 @@ A geração de relatórios de exportação cruza a natureza do ativo, o prazo de
 
 ---
 
-### 8. Fluxograma das transações
+### 9. Fluxograma das transações
 
 ```mermaid
 flowchart TD
