@@ -364,13 +364,10 @@ O fluxo lógico depende diretamente da elegibilidade da entidade detentora:
   - `originalAcquisitionDate = null`
 
 #### ➤ Caso 3: permuta com múltiplos ativos (BTC → ETH + SOL)
-> [!NOTE]
-> No DeFi o ónus da prova cabe inteiramente ao contribuinte. A Autoridade Tributária (AT) não monitoriza de forma automática as suas wallets privadas ou protocolos descentralizados, pelo que é o titular quem tem de demonstrar a origem, o histórico e o tempo de detenção dos ativos para beneficiar das isenções fiscais.
-
 
 **Exemplo:**
 - Data: 2024-08-15
-- Entidade: Uniswap (type: 'Hot Wallet', countryCode: 'PT')
+- Entidade: Binance (type: 'Exchange', countryCode: 'GE')
 - Ativo entregue: BTC (1.0) - Custo histórico total: 30.000€
 - Ativos recebidos: ETH (0.3) + SOL (0.2)
 - Valores de mercado proporcionais calculados no instante da troca:
@@ -496,6 +493,9 @@ O Código do IRS não faz qualquer distinção operacional entre finanças desce
 5. **Isenção após 365 dias:** Aplicável apenas a criptoativos não-mobiliários.
 
 #### 6.4. Como implementar _DeFi_ no algoritmo
+
+> [!NOTE]
+> No DeFi o ónus da prova cabe inteiramente ao contribuinte. A Autoridade Tributária (AT) não monitoriza de forma automática as suas wallets privadas ou protocolos descentralizados, pelo que é o titular quem tem de demonstrar a origem, o histórico e o tempo de detenção dos ativos para beneficiar das isenções fiscais.
  
 Como os protocolos *DeFi* correm em contratos sem localização geográfica tradicional, o algoritmo determina a `fiscalEligibility` avaliando o `type` da carteira que assina a transação (`Cold/Hot Wallet`), herdando o país de residência fiscal do utilizador (ex: 'PT' = `COOPERATING`). No entanto, o encaminhamento declarativo de curto prazo é sempre remetido para o **Anexo J**, dada a ausência de intermediário financeiro nacional.
 
