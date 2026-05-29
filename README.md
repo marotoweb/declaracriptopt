@@ -57,7 +57,7 @@ Este algoritmo é uma ferramenta de cálculo baseada numa interpretação lógic
       - [➤ Caso 2: permuta simples em entidade não cooperante (BTC → ETH)](#-caso-2-permuta-simples-em-entidade-não-cooperante-btc--eth)
       - [➤ Caso 3: permuta com múltiplos ativos (BTC → ETH + SOL)](#-caso-3-permuta-com-múltiplos-ativos-btc--eth--sol)
     - [4. Tratamento das taxas](#4-tratamento-das-taxas)
-    - [4.1. Taxa paga em FIAT](#41-taxa-paga-em-fiat)
+      - [4.1. Taxa paga em FIAT](#41-taxa-paga-em-fiat)
       - [4.2. Taxa paga em cripto](#42-taxa-paga-em-cripto)
       - [Dupla entrada fiscal aplicável apenas quando deve ser:](#dupla-entrada-fiscal-aplicável-apenas-quando-deve-ser)
       - [➤ Caso 1: taxa paga em FIAT](#-caso-1-taxa-paga-em-fiat)
@@ -65,8 +65,7 @@ Este algoritmo é uma ferramenta de cálculo baseada numa interpretação lógic
     - [5. Tratamento fiscal de NFT](#5-tratamento-fiscal-de-nft)
       - [5.1 O que é NFT?](#51-o-que-é-nft)
       - [5.2. Enquadramento fiscal de NFT em Portugal (CIRS)](#52-enquadramento-fiscal-de-nft-em-portugal-cirs)
-    - [5.3 Como o algoritmo trata os NFT](#53-como-o-algoritmo-trata-os-nft)
-  - [Em vez de aplicar a lógica FIFO de cripto, o motor suspende o processamento da linha e emite um aviso ao utilizador para reporte manual na categoria geral correspondente do IRS (ex: Categoria B se houver cariz profissional, ou mais-valia geral se aplicável), uma vez que a Autoridade Tributária analisa estes ativos pela sua substância (ex: se representa arte digital, propriedade, ou um direito de serviço).](#em-vez-de-aplicar-a-lógica-fifo-de-cripto-o-motor-suspende-o-processamento-da-linha-e-emite-um-aviso-ao-utilizador-para-reporte-manual-na-categoria-geral-correspondente-do-irs-ex-categoria-b-se-houver-cariz-profissional-ou-mais-valia-geral-se-aplicável-uma-vez-que-a-autoridade-tributária-analisa-estes-ativos-pela-sua-substância-ex-se-representa-arte-digital-propriedade-ou-um-direito-de-serviço)
+      - [5.3 Como o algoritmo trata os NFT](#53-como-o-algoritmo-trata-os-nft)
     - [6. Tratamento fiscal de _DeFi_](#6-tratamento-fiscal-de-defi)
       - [6.1. O que é _DeFi_?](#61-o-que-é-defi)
       - [Exemplos comuns de _DeFi_:](#exemplos-comuns-de-defi)
@@ -78,8 +77,8 @@ Este algoritmo é uma ferramenta de cálculo baseada numa interpretação lógic
       - [➤ Caso 3: retirada de liquidez (*withdrawal* de *LP*)](#-caso-3-retirada-de-liquidez-withdrawal-de-lp)
       - [➤ Caso 4: taxas em _DeFi_ (*gas fees*)](#-caso-4-taxas-em-defi-gas-fees)
     - [7. Sumário final](#7-sumário-final)
-      - [Matriz de exportação de relatórios (IRS)](#matriz-de-exportação-de-relatórios-irs)
-    - [8. Fluxograma das transações](#8-fluxograma-das-transações)
+    - [8. Matriz de exportação de relatórios (IRS)](#8-matriz-de-exportação-de-relatórios-irs)
+    - [9. Fluxograma das transações](#9-fluxograma-das-transações)
   - [🤝 Como Contribuir](#-como-contribuir)
   - [📄 Licença](#-licença)
 
@@ -137,7 +136,8 @@ Cada entidade (carteira ou *exchange*) deve ser criada com os seguintes atributo
 
 O algoritmo calcula os seguintes estados implícitos no momento da transação:
 * **`fiscalEligibility`**: Determinado a partir do `countryCode`. Consulta uma tabela interna para classificar o país como cooperante (`COOPERATING`), não cooperante (`NON_COOPERATING` - paraísos fiscais da lista negra nacional) ou desconhecido. O estado desconhecido suspende o cálculo para obrigar à revisão e intervenção manual.
-* **Destino declarativo**: Determinado de forma dinâmica no processamento. Se `type` for 'Exchange' e `countryCode` for 'PT', as mais-valias de curto prazo seguem para o **Anexo G**. Se `type` for 'Exchange' e `countryCode` for diferente de 'PT' (ex: 'IE'), seguem para o **Anexo J**. Para carteiras pessoais (`type` igual a 'Cold Wallet' ou 'Hot Wallet'), o algoritmo assume por defeito o `countryCode` de residência do sujeito passivo (ex: 'PT') para efeitos de `fiscalEligibility`, mas encaminha sempre o curto prazo para o **Anexo J**, uma vez que a custódia não pertence a um intermediário financeiro nacional.
+* **Destino declarativo**: Determinado de forma dinâmica no processamento. Se `type` for 'Exchange' e `countryCode` for 'PT', as mais-valias de curto prazo seguem para o **Anexo G**. Se `type` for 'Exchange' e `countryCode` for diferente de 'PT' (ex: 'IE'), seguem para o **Anexo J**. Para carteiras pessoais ou DeFi (`type` igual a 'Cold Wallet' ou 'Hot Wallet'), o algoritmo assume por defeito o `countryCode` de residência do sujeito passivo (ex: 'PT') para efeitos de `fiscalEligibility`, mas encaminha sempre o curto prazo para o **Anexo J**, uma vez que a custódia não pertence a um intermediário financeiro nacional.
+
 
 #### Estrutura do lote (`Lot`)
 Cada `Lot` deve ter:
@@ -153,9 +153,9 @@ Cada `Lot` deve ter:
 
 ---
 
-### 3. Tratamento por tipo de transação
+## 3. Tratamento por tipo de transação
 
-#### 3.1. `deposit`
+### 3.1. `deposit`
 
 Um depósito é sempre uma **aquisição** que cria um novo lote:
 * **tag: 'buy':** `costPerUnit` = `fiatValue`, `acquisitionDate` = data da transação.
@@ -200,7 +200,7 @@ Um depósito é sempre uma **aquisição** que cria um novo lote:
 
 ---
 
-#### 3.2. `withdrawal`
+### 3.2. `withdrawal`
 
 Inclui **qualquer alienação para algo não-cripto**, como:
 * **FIAT**
@@ -313,7 +313,7 @@ A data da transferência em si (`acquisitionDate` do novo local) **não influenc
 
 ---
 
-#### 3.3. `trade` (permuta cripto-cripto)
+### 3.3. `trade` (permuta cripto-cripto)
 
 O fluxo lógico depende diretamente da elegibilidade da entidade detentora:
 
@@ -363,12 +363,10 @@ O fluxo lógico depende diretamente da elegibilidade da entidade detentora:
   - `originalAcquisitionDate = null`
 
 #### ➤ Caso 3: permuta com múltiplos ativos (BTC → ETH + SOL)
-> [!WARNING]
-> **TODO:** Validar qual a fiscalEligibility em DeFi para carteira de titular em Portugal
- 
+
 **Exemplo:**
 - Data: 2024-08-15
-- Entidade: Uniswap (type: 'Hot Wallet', countryCode: 'PT')
+- Entidade: Binance (type: 'Exchange', countryCode: 'GE')
 - Ativo entregue: BTC (1.0) - Custo histórico total: 30.000€
 - Ativos recebidos: ETH (0.3) + SOL (0.2)
 - Valores de mercado proporcionais calculados no instante da troca:
@@ -396,14 +394,14 @@ O fluxo lógico depende diretamente da elegibilidade da entidade detentora:
 
 ---
 
-### 4. Tratamento das taxas
+## 4. Tratamento das taxas
 
 A lógica de tratamento de taxas é offline e determinística, aplicando os princípios gerais de "alienação onerosa" (Art. 10.º) e "apuramento de mais-valias" (Art. 43.º).
 
 ### 4.1. Taxa paga em FIAT
 ➡️ **É um encargo puro da alienação**, deduzido diretamente na fórmula da mais-valia.
 
-#### 4.2. Taxa paga em cripto
+### 4.2. Taxa paga em cripto
 
 A taxa é tratada como uma **micro-alienação** do criptoativo usado para liquidá-la.
 
@@ -428,8 +426,6 @@ Valor de realização da micro-alienação:
 - Mais-valia = 30.000€ - 15.000€ - 50€ = **14.950€**
 - Se tributável (< 365 dias): IRS = 14.950€ × 28% = **4.186€**
 
----
-
 #### ➤ Caso 2: taxa paga em cripto
 **Exemplo:**
 - Venda de 0.5 BTC por 30.000€
@@ -447,9 +443,9 @@ Valor de realização da micro-alienação:
 
 ---
 
-### 5. Tratamento fiscal de NFT
+## 5. Tratamento fiscal de NFT
 
-#### 5.1 O que é NFT?
+### 5.1 O que é NFT?
 NFT significa *Non-Fungible Token* (*Token* não fungível). Representa um certificado digital de propriedade sobre um ativo único, indivisível e não intermutável (ex.: arte digital, colecionáveis, registos de exclusividade).
 
 **Não fungível** = único e irrepetível.
@@ -459,43 +455,45 @@ Diferente de moedas ou criptomoedas (como Bitcoin ou Ethereum), que são fungív
 - Um Bitcoin = outro Bitcoin → fungível.
 - Um NFT de uma obra de arte digital = só existe um → não fungível.
 
-#### 5.2. Enquadramento fiscal de NFT em Portugal (CIRS)
+### 5.2. Enquadramento fiscal de NFT em Portugal (CIRS)
 Por força da exclusão legal da definição de criptoativos, as transações de NFT **não seguem o regime das criptomoedas**. Isto implica um tratamento severo pelo algoritmo:
 
 1. **Revogação de Isenções:** Não existe exclusão de tributação após 365 dias de detenção.
 2. **Permutas Tributáveis:** Trocar um NFT por outro (ou por ETH) não goza de neutralidade fiscal. É um evento de alienação imediato com apuramento de ganho em Euros baseado no valor de mercado.
 
 ### 5.3 Como o algoritmo trata os NFT
-Para evitar cálculos errados e proteger o utilizador, o algoritmo implementa uma **"Flag de Bloqueio/Alerta"** (`assetType: 'NFT'`). 
+Para evitar cálculos errados e proteger o utilizador, o algoritmo implementa uma **"Flag de Bloqueio/Alerta"** (`assetType: 'NFT'`).
 
 Em vez de aplicar a lógica FIFO de cripto, o motor suspende o processamento da linha e emite um aviso ao utilizador para reporte manual na categoria geral correspondente do IRS (ex: Categoria B se houver cariz profissional, ou mais-valia geral se aplicável), uma vez que a Autoridade Tributária analisa estes ativos pela sua substância (ex: se representa arte digital, propriedade, ou um direito de serviço).
+
 ---
 
-### 6. Tratamento fiscal de _DeFi_
+## 6. Tratamento fiscal de _DeFi_
 
-#### 6.1. O que é _DeFi_?
+### 6.1. O que é _DeFi_?
 *DeFi* (*Decentralized Finance*) engloba serviços financeiros (empréstimos, trocas automatizadas, derivados) executados diretamente através de *smart contracts* em redes *blockchain*, sem a presença de intermediários centralizados.
  
-#### Exemplos comuns de _DeFi_:
+### Exemplos comuns de _DeFi_:
 - ***Staking* (delegar *tokens* para validar redes)**
 - ***Lending* & *Borrowing* (emprestar ou pedir emprestado cripto)**
 - ***Liquidity pools* (fornecer liquidez em _exchanges_ descentralizadas como Uniswap)**
 - ***Yield farming* (ganhar recompensas por fornecer liquidez)**
 - ***Stablecoins* (USDC, DAI, etc.)**
 
-#### 6.2. Enquadramento fiscal de _DeFi_ em Portugal (CIRS)
+### 6.2. Enquadramento fiscal de _DeFi_ em Portugal (CIRS)
 O Código do IRS não faz qualquer distinção operacional entre finanças descentralizadas (*DeFi*) ou centralizadas (*CeFi*). As regras gerais da Categoria G aplicam-se igualmente à natureza dos ativos movimentados.
 
-#### 6.3 Princípios aplicáveis ao _DeFi_:
+### 6.3 Princípios aplicáveis ao _DeFi_:
 1. **Rendimentos passivos (*staking*, *yield farming*):** São tratados sob o regime de **suspensão de tributação**. O custo de aquisição é **0,00€**.
 2. **Alienação de ativos _DeFi_ (venda, troca, saque):** Mais-valia calculada com *FIFO*.
 3. **Permutas _DeFi_ (ex.: ETH → *LP token*):** Neutras fiscalmente (Art. 10.º, n.º 20).
 4. **Taxas em _DeFi_ (*gas fees*):** Tratadas como micro-alienações se pagas em cripto.
 5. **Isenção após 365 dias:** Aplicável apenas a criptoativos não-mobiliários.
 
-#### 6.4. Como implementar _DeFi_ no algoritmo
-> [!WARNING]
-> **TODO:** Validar qual a fiscalEligibility em DeFi para carteira de titular em Portugal
+### 6.4. Como implementar _DeFi_ no algoritmo
+
+> [!NOTE]
+> No DeFi o ónus da prova cabe inteiramente ao contribuinte. A Autoridade Tributária (AT) não monitoriza de forma automática as suas wallets privadas ou protocolos descentralizados, pelo que é o titular quem tem de demonstrar a origem, o histórico e o tempo de detenção dos ativos para beneficiar das isenções fiscais.
  
 Como os protocolos *DeFi* correm em contratos sem localização geográfica tradicional, o algoritmo determina a `fiscalEligibility` avaliando o `type` da carteira que assina a transação (`Cold/Hot Wallet`), herdando o país de residência fiscal do utilizador (ex: 'PT' = `COOPERATING`). No entanto, o encaminhamento declarativo de curto prazo é sempre remetido para o **Anexo J**, dada a ausência de intermediário financeiro nacional.
 
@@ -515,8 +513,6 @@ Como os protocolos *DeFi* correm em contratos sem localização geográfica trad
   - `originalAcquisitionDate = null`
 - *Ação fiscal:* Nenhuma no momento da receção. A tributação ocorrerá apenas na venda por Euros (Categoria G).
 
----
-
 #### ➤ Caso 2: fornecimento de liquidez (*liquidity pool*)
 **Exemplo:**
 - Data: 2024-07-01
@@ -533,8 +529,6 @@ Como os protocolos *DeFi* correm em contratos sem localização geográfica trad
   - `originalAcquisitionDate = null` (contador reinicia)
 
 ➡️ **Evento neutro fiscalmente**, permuta cripto-cripto.
-
----
 
 #### ➤ Caso 3: retirada de liquidez (*withdrawal* de *LP*)
 **Exemplo:**
@@ -553,8 +547,6 @@ Como os protocolos *DeFi* correm em contratos sem localização geográfica trad
 > Os ativos recebidos de volta (ETH, USDC) entram como novos lotes com custo igual ao seu valor de mercado no dia da retirada (2.500€ no total).
 - **Ação:** Sendo curto prazo numa estrutura sem intermediário nacional, é direcionado para o **Anexo J, Quadro 9.4A**.
 
----
-
 #### ➤ Caso 4: taxas em _DeFi_ (*gas fees*)
 **Exemplo:**
 - Transação DeFi (ex.: staking)
@@ -568,7 +560,7 @@ Como os protocolos *DeFi* correm em contratos sem localização geográfica trad
 
 ---
 
-### 7. Sumário final
+## 7. Sumário final
 
 * **Depósitos:** criam novos lotes com o custo real (no caso de uma compra) ou com **custo zero** (no caso de rendimentos passivos recebidos diretamente em criptoativos).
 * **Alienações para FIAT, bens ou serviços:** Curto prazo (< 365 dias) é sempre tributado a 28%. Longo prazo (≥ 365 dias) em países cooperantes é isento. Transações em paraísos fiscais perdem o direito a isenção de longo prazo.
@@ -584,7 +576,9 @@ Como os protocolos *DeFi* correm em contratos sem localização geográfica trad
   - Taxas pagas em fiat: reduzem o valor de realização / acrescem aos encargos dedutíveis da operação principal.
   - Taxas pagas em criptoativos: são tratadas como micro-alienações autónomas do ativo usado para o pagamento.
 
-#### Matriz de exportação de relatórios (IRS)
+---
+
+## 8. Matriz de exportação de relatórios (IRS)
 
 A geração de relatórios de exportação cruza a natureza do ativo, o prazo de detenção e a jurisdição da entidade para o preenchimento correto dos anexos da Autoridade Tributária:
 
@@ -597,7 +591,7 @@ A geração de relatórios de exportação cruza a natureza do ativo, o prazo de
 
 ---
 
-### 8. Fluxograma das transações
+## 9. Fluxograma das transações
 
 ```mermaid
 flowchart TD
