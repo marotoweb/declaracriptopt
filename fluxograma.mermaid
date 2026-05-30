@@ -51,10 +51,9 @@ flowchart TD
     G4 --> H
 
     H -->|FIAT| H1[Taxa reduz o valor de<br> realização / encargo]
-    H -->|CRYPTO| H2[Micro-alienação: apurar<br> mais/menos-valia da taxa]
-    H2 --> H3{Operação principal<br> tributável?}
-    H3 -->|Sim| H4[Somar taxa como encargo<br> da alienação principal]
-    H3 -->|Não| H5[Registar apenas a<br> micro-alienação da taxa]
+    H -->|CRYPTO| H2[Fixa despesa pelo valor de<br> mercado: feeFiatValue]
+    H2 --> H3[Deduz feeFiatValue como encargo<br> Art. 51.º da operação principal]
+    H3 --> H4[Dá baixa física da fração no FIFO<br> Valor de mercado: Mais-valia taxa = 0€]
 
     %% ESTILIZAÇÃO DO GRAPH
     style A fill:#f9f,stroke:#333,stroke-width:2px,color:#000
