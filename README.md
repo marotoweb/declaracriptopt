@@ -619,6 +619,14 @@ A geração de relatórios de exportação cruza a natureza do ativo, o prazo de
 | ***Security Token*** | Qualquer Prazo | **Anexo G, Quadro 18A** (Tributável) | **Anexo J, Quadro 9.4A** (Tributável) | **Anexo J, Quadro 9.4A** (Tributável) |
 | **NFT** | Qualquer prazo | **Excluído** (Tributavel) | **Excluído** (Tributavel) | **Excluído** (Tributavel) |
 
+[//]: # (Issue 7)
+
+> [!NOTE]
+> **Fundamentação para o enquadramento de *self-custody* no Anexo J:** as transações executadas a partir de carteiras privadas (como *cold wallets* ou *hot wallets*) não possuem um intermediário centralizado estabelecido em território nacional. Em conformidade com a natureza territorial do Anexo J e as diretrizes do Ofício Circulado 20269/2024, estas mais-valias de curto prazo tributáveis são encaminhadas para o **Anexo J**, utilizando o código do país de residência fiscal do sujeito passivo como a origem declarativa do fluxo monetário.
+
+> [!IMPORTANT]
+> **Necessidade de validação profissional:** Embora a presente matriz tente refletir rigorosamente o CIRS e a doutrina administrativa conhecida, o mapeamento automático de anexos deve ser validado por um Contabilista Certificado (CC) ou Advogado Fiscalista antes de ser integrado em ambientes de produção. Isto garante a conformidade com eventuais alterações informais ou restrições técnicas específicas da aplicação web de submissão da Modelo 3 da Autoridade Tributária.
+
 ---
 
 ## 9. Fluxograma das transações
