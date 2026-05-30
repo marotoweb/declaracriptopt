@@ -136,7 +136,7 @@ Cada entidade (carteira ou *exchange*) deve ser criada com os seguintes atributo
 * **`countryCode`**: Código ISO-3166 alfa-2 do país onde a entidade está sediada (ex: 'PT', 'IE', 'KY').
 
 O algoritmo calcula os seguintes estados implícitos no momento da transação:
-* **`fiscalEligibility`**: Determinado a partir do `countryCode`. Consulta uma tabela interna para classificar o país como cooperante (`COOPERATING`), não cooperante (`NON_COOPERATING` - paraísos fiscais da lista negra nacional) ou desconhecido. O estado desconhecido suspende o cálculo para obrigar à revisão e intervenção manual.
+* **`fiscalEligibility`**: Determinado a partir do `countryCode`. Consulta uma tabela interna para classificar o país como cooperante (`COOPERATING`), não cooperante (`NON_COOPERATING` - paraísos fiscais da lista negra nacional) ou desconhecido. O estado desconhecido suspende o cálculo para obrigar à revisão e intervenção manual. De forma análoga, qualquer transação que apresente uma taxa em criptoativo sem o campo feeFiatValue preenchido é marcada com o estado INCOMPLETE e excluída do cálculo e do relatório de exportação até resolução manual.
 * **Destino declarativo**: Determinado de forma dinâmica no processamento. Se `type` for 'Exchange' e `countryCode` for 'PT', as mais-valias de curto prazo seguem para o **Anexo G**. Se `type` for 'Exchange' e `countryCode` for diferente de 'PT' (ex: 'IE'), seguem para o **Anexo J**. Para carteiras pessoais ou DeFi (`type` igual a 'Cold Wallet' ou 'Hot Wallet'), o algoritmo assume por defeito o `countryCode` de residência do sujeito passivo (ex: 'PT') para efeitos de `fiscalEligibility`, mas encaminha sempre o curto prazo para o **Anexo J**, uma vez que a custódia não pertence a um intermediário financeiro nacional.
 
 
@@ -435,9 +435,11 @@ A lógica de tratamento de taxas é offline e determinística, aplicando os prin
 
 ### 4.2. Taxa paga em cripto
 
-Ao processar uma comissão em criptoativos, o algoritmo rejeita o custo histórico (FIFO) para mensurar a despesa ou para apurar mais-valias sobre a taxa. O encargo dedutível (Art. 51.º, n.º 1, al. b) do CIRS) é determinado pelo valor de mercado em euros no momento da transação, registado no campo `feeFiatValue`.
+Ao processar uma comissão em criptoativos, o algoritmo rejeita o custo histórico (FIFO) para mensurar a despesa ou para apurar mais-valias sobre a taxa. O encargo dedutível (Art. 51.º, n.º 1, al. b) do CIRS) é determinado pelo valor em euros no momento da transação, registado no campo `feeFiatValue`.
 
-Este tratamento é aplicado de forma uniforme em vendas, permutas e transferências, garantindo que o encargo atue como redutor do lucro tributável sem dependência de introdução manual quando exista cotação offline ou online.
+`feeFiatValue` deve ser sempre expresso em euros, independentemente do ativo usado para pagar a comissão. O valor pode ser obtido por API de cotação histórica ou introduzido manualmente pelo utilizador. Se ausente quando obrigatório (ver regra em [`modelo_transaction.md`](docs/modelo_transaction.md)), o motor marca a transação como `INCOMPLETE` e exclui-a do cálculo e do relatório até o campo ser preenchido.
+
+Este tratamento é aplicado de forma uniforme em vendas, permutas e transferências. Nos depósitos de rendimento passivo (`staking`, `airdrop`, `rewards`, `interest`, `defi`), `feeFiatValue` não é aplicável: o protocolo suporta o custo de rede ou este não existe do ponto de vista do recetor.
 
 #### ➤ Caso 1: taxa paga em FIAT
 **Exemplo:**

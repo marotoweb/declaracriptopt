@@ -15,10 +15,22 @@ Este documento descreve as propriedades brutas que o motor de cálculo espera re
 | `toWalletId` | String | ID da carteira de destino. | Não |
 | `feeAmount` | Number | Quantidade da taxa paga. | Não |
 | `feeAssetSymbol` | String | Símbolo do ativo em que a taxa foi paga (ex: "EUR", "BNB"). | Não |
-| `feeFiatValue` | Number | Valor de mercado em euros da taxa de transação no exato momento da operação. Utilizado para deduzir o encargo de forma direta quando a comissão é paga em criptoativos. | Não |
+| `feeFiatValue` | Number | Valor em euros da taxa no exato momento da operação. Deve ser sempre expresso em euros, independentemente do ativo usado para pagar a comissão. Utilizado para deduzir o encargo (Art. 51.º do CIRS) e para dar baixa física da fração no inventário FIFO. **Condicional** (ver regra abaixo). | Condicional |
 | `fiatValue` | Number | Valor total em FIAT da transação (para `deposit`/`withdrawal`). | Não |
 | `tag` | String | **Chave fixa em inglês** que categoriza a transação (`"buy"`, `"sell"`, `"staking"`, etc.). | Não |
 | `notes` | String | Notas adicionais do utilizador. | Não |
+
+### Regra de obrigatoriedade de `feeFiatValue`
+
+`feeFiatValue` é **obrigatório** quando as três condições se verificam em simultâneo:
+
+1. `feeAmount` está preenchido e é maior que zero.
+2. `feeAssetSymbol` é um criptoativo (qualquer valor diferente de `"EUR"` ou outra moeda fiat).
+3. `type` não é `"deposit"` com `tag` de rendimento passivo (`"staking"`, `"airdrop"`, `"interest"`, `"rewards"`, `"defi"`).
+
+Nos depósitos de rendimento passivo, o protocolo suporta o custo de rede ou este simplesmente não existe do ponto de vista do recetor, pelo que `feeFiatValue` não é aplicável e é ignorado mesmo que preenchido.
+
+Se as três condições se verificarem e `feeFiatValue` estiver ausente ou nulo, o motor marca a transação com o estado `INCOMPLETE`, exclui-a do cálculo de mais-valias e do relatório de exportação, e regista-a na lista de transações pendentes para revisão. O valor pode ser fornecido manualmente pelo utilizador ou obtido por API de cotação histórica.
 
 **Exemplos de `Transaction`:**
 
@@ -54,7 +66,7 @@ Este documento descreve as propriedades brutas que o motor de cálculo espera re
     }
     ```
 
-*   **Recompensa de Staking:**
+*   **Recompensa de Staking (sem `feeFiatValue`):**
     ```json
     {
       "id": "tx_stake_01",
@@ -68,7 +80,7 @@ Este documento descreve as propriedades brutas que o motor de cálculo espera re
     }
     ```
 
-*   **Trade (Cripto para Cripto):**
+*   **Trade (Cripto para Cripto) com taxa em cripto — `feeFiatValue` obrigatório:**
     ```json
     {
       "id": "tx_trade_01",
@@ -82,6 +94,7 @@ Este documento descreve as propriedades brutas que o motor de cálculo espera re
       "toWalletId": "wallet-main-001",
       "feeAmount": 0.001,
       "feeAssetSymbol": "ETH",
+      "feeFiatValue": 2.85,
       "tag": "trade"
     }
     ```
