@@ -43,6 +43,10 @@ Este algoritmo é uma ferramenta de cálculo baseada numa interpretação lógic
       - [Estrutura do lote (`Lot`)](#estrutura-do-lote-lot)
       - [Critério de ordenação FIFO e prioridade de consumo](#critério-de-ordenação-fifo-e-prioridade-de-consumo)
       - [Estruturas avançadas de suporte (implementação de código)](#estruturas-avançadas-de-suporte-implementação-de-código)
+    - [2.3 Critério de indexação e conversão de cotações (Moedas estrangeiras e API)](#23-critério-de-indexação-e-conversão-de-cotações-moedas-estrangeiras-e-api)
+      - [1. Indexação de criptoativos](#1-indexação-de-criptoativos)
+      - [2. Normalização cambial de moedas fiduciárias](#2-normalização-cambial-de-moedas-fiduciárias)
+      - [3. Fluxo de processamento](#3-fluxo-de-processamento)
   - [3. Tratamento por tipo de transação](#3-tratamento-por-tipo-de-transação)
     - [3.1. `deposit`](#31-deposit)
       - [➤ Caso 1: compra com FIAT (`tag: 'buy'`)](#-caso-1-compra-com-fiat-tag-buy)
@@ -174,6 +178,25 @@ Para evitar o crescimento excessivo deste documento com propriedades estritas de
 [Especificação completa de (`Wallet`)](docs/modelo_wallet.md)<br>
 [Especificação completa de (`Transaction`)](docs/modelo_transaction.md) - Contém todos os campos de importação de dados e o funcionamento além de `feeFiatValue`.
 </details>
+
+### 2.3 Critério de indexação e conversão de cotações (Moedas estrangeiras e API)
+
+O motor de cálculo opera utilizando o Euro (EUR) como moeda base universal. Sempre que uma transação seja registada numa moeda fiduciária estrangeira ou necessite de consulta automatizada a uma API externa, aplicam-se as regras do Artigo 23.º do CIRS.
+
+#### 1. Indexação de criptoativos
+**Preço de mercado exato:** Se a API externa disponibilizar a cotação histórica correspondente ao segundo exato da transação, o motor utiliza esse valor.
+**Preço de fecho diário:** Caso apenas existam dados diários agregados, o critério obrigatório é o valor de fecho às 23:59:59 UTC do dia da operação. Fica interdito o uso de médias diárias voláteis.
+
+#### 2. Normalização cambial de moedas fiduciárias
+Sempre que o valor obtido esteja expresso numa divisa diferente de EUR, o sistema efetua a conversão aplicando a paridade oficial:
+**Taxa de câmbio de referência:** Utiliza-se a taxa de câmbio de fecho diário publicada pelo Banco Central Europeu (BCE) para o par de moedas em causa.
+**Regra temporal:** A conversão processa-se com base na taxa do próprio dia da operação.
+**Tratamento de dias não úteis:** Na ausência de publicação de tabelas de câmbio pelo BCE aos fins de semana ou feriados bancários, aplica-se o disposto no Artigo 23.º, n.º 2 do CIRS, utilizando-se a taxa de câmbio oficial do primeiro dia útil subsequente.
+
+#### 3. Fluxo de processamento
+Os valores em moeda estrangeira são normalizados na periferia do sistema durante a fase de ingestão de dados, impedindo a entrada de divisas alternativas no inventário FIFO:
+
+`[Transação em USD] -> [Conversão: Câmbio BCE (Dia útil subsequente se aplicável)] -> [Motor FIFO em EUR]`
 
 ---
 
