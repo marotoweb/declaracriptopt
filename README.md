@@ -41,6 +41,7 @@ Este algoritmo é uma ferramenta de cálculo baseada numa interpretação lógic
     - [2.2. Estrutura e modelo de dados](#22-estrutura-e-modelo-de-dados)
       - [Definição de entidade (`Wallet`)](#definição-de-entidade-wallet)
       - [Estrutura do lote (`Lot`)](#estrutura-do-lote-lot)
+      - [Critério de ordenação FIFO e prioridade de consumo](#critério-de-ordenação-fifo-e-prioridade-de-consumo)
       - [Estruturas avançadas de suporte (implementação de código)](#estruturas-avançadas-de-suporte-implementação-de-código)
   - [3. Tratamento por tipo de transação](#3-tratamento-por-tipo-de-transação)
     - [3.1. `deposit`](#31-deposit)
@@ -53,7 +54,6 @@ Este algoritmo é uma ferramenta de cálculo baseada numa interpretação lógic
       - [➤ Caso 2: venda para FIAT numa jurisdição não cooperante (paraíso fiscal)](#-caso-2-venda-para-fiat-numa-jurisdição-não-cooperante-paraíso-fiscal)
       - [➤ Caso 3: venda para FIAT com taxa em cripto](#-caso-3-venda-para-fiat-com-taxa-em-cripto)
       - [➤ Caso 4: transferência entre entidades com taxa (`tag: 'transfer'`, `fiatValue = null`)](#-caso-4-transferência-entre-entidades-com-taxa-tag-transfer-fiatvalue--null)
-  - [➡️ **O montante principal (0.499 BTC) é neutro fiscalmente**, servindo a baixa da comissão apenas para manter o inventário físico da pilha FIFO sincronizado.](#️-o-montante-principal-0499-btc-é-neutro-fiscalmente-servindo-a-baixa-da-comissão-apenas-para-manter-o-inventário-físico-da-pilha-fifo-sincronizado)
     - [3.3. `trade` (permuta cripto-cripto)](#33-trade-permuta-cripto-cripto)
       - [➤ Caso 1: permuta simples em entidade cooperante (BTC → ETH)](#-caso-1-permuta-simples-em-entidade-cooperante-btc--eth)
       - [➤ Caso 2: permuta simples em entidade não cooperante (BTC → ETH)](#-caso-2-permuta-simples-em-entidade-não-cooperante-btc--eth)
@@ -125,8 +125,8 @@ O motor opera sobre os seguintes princípios fundamentais:
 ---
 
 ### 2.2. Estrutura e modelo de dados
-
-O sistema utiliza uma estrutura de pilhas FIFO por entidade: um `Map<Entity, Map<Asset, List<Lot>>>`.
+[//]: # (Issue #6)
+O sistema utiliza uma estrutura de pilhas FIFO por entidade: um `Map<Entity, Map<Asset, List<Lot>>>`, onde a lista de lotes de cada ativo é dinamicamente ordenada pela data de aquisição original para garantir a prioridade do FIFO fiscal
 
 #### Definição de entidade [(`Wallet`)](docs/modelo_wallet.md)
 Cada entidade (carteira ou *exchange*) deve ser criada com os seguintes atributos:
@@ -153,6 +153,18 @@ Cada `Lot` deve ter:
 
 > [!NOTE]
 > O campo `originalAcquisitionDate` preserva a data de compra original quando um ativo é transferido entre entidades, impedindo o reinício incorreto do contador dos 365 dias.
+
+#### Critério de ordenação FIFO e prioridade de consumo
+[//]: # (Issue #6)
+Para garantir o estrito cumprimento do Art. 43.º, n.º 8, al. g) do CIRS ("os alienados são os adquiridos há mais tempo"), o algoritmo impõe uma distinção clara entre a prioridade de consumo de um lote e a sua disponibilidade física:
+
+1. **Chave de ordenação FIFO (Prioridade):** antes de processar qualquer venda ou permuta, a lista cronológica de lotes (`List<Lot>`) pertencente à entidade e ao ativo em causa deve ser obrigatoriamente ordenada de forma ascendente pela sua data de aquisição original efetiva:
+   $$\text{Data de ordenação} = \text{originalAcquisitionDate} \ ?? \ \text{acquisitionDate}$$
+   Isto garante que um lote comprado em 2022, mas transferido para a exchange apenas em 2026, mantenha prioridade absoluta de consumo sobre um lote comprado diretamente na exchange em 2025.
+
+2. **Filtro de disponibilidade temporal:** a data de entrada do lote na carteira específica (`acquisitionDate`) não determina a sua antiguidade fiscal, mas atua como um filtro de segurança. O algoritmo apenas considera um lote elegível para consumo se:
+   $$\text{acquisitionDate do lote} \le \text{Data de realização da venda}$$
+   Este filtro impede que o motor de cálculo consuma retroativamente saldos que ainda não tinham sido movidos para aquela entidade no momento cronológico da operação.
 
 #### Estruturas avançadas de suporte (implementação de código)
 <details>
@@ -326,6 +338,11 @@ A data da transferência em si (`acquisitionDate` do novo local) **não influenc
   - `isSecurityToken` = (preservado da origem)
 
 ➡️ **O montante principal (0.499 BTC) é neutro fiscalmente**, servindo a baixa da comissão apenas para manter o inventário físico da pilha FIFO sincronizado.
+
+[//]: # (Issue #6)
+> [!IMPORTANT]
+> **Impacto na ordenação FIFO:** embora o novo lote aterre na Ledger com a propriedade `acquisitionDate` definida para o dia da transferência (essencial para validar que o saldo só está disponível a partir dessa data), este lote **não vai para o fim da fila de consumo**. O motor de cálculo, ao ordenar a pilha pela `originalAcquisitionDate`, garante que estes 0.499 BTC mantêm a sua antiguidade real de 15 de janeiro de 2024, retendo a sua prioridade histórica numa futura venda.
+
 ---
 
 ### 3.3. `trade` (permuta cripto-cripto)
