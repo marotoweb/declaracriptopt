@@ -27,3 +27,4 @@ Representa uma carteira ou conta numa exchange.
   "countryCode": "IE"
 }
 ```
+[Voltar](../README.md)
