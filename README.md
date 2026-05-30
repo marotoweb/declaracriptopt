@@ -184,13 +184,13 @@ Para evitar o crescimento excessivo deste documento com propriedades estritas de
 O motor de cálculo opera utilizando o Euro (EUR) como moeda base universal. Sempre que uma transação seja registada numa moeda fiduciária estrangeira ou necessite de consulta automatizada a uma API externa, aplicam-se as regras do Artigo 23.º do CIRS.
 
 #### 1. Indexação de criptoativos
-**Preço de mercado exato:** Se a API externa disponibilizar a cotação histórica correspondente ao segundo exato da transação, o motor utiliza esse valor.
+**Preço de mercado exato:** Se a API externa disponibilizar a cotação histórica correspondente ao segundo exato da transação, o motor utiliza esse valor.  
 **Preço de fecho diário:** Caso apenas existam dados diários agregados, o critério obrigatório é o valor de fecho às 23:59:59 UTC do dia da operação. Fica interdito o uso de médias diárias voláteis.
 
 #### 2. Normalização cambial de moedas fiduciárias
-Sempre que o valor obtido esteja expresso numa divisa diferente de EUR, o sistema efetua a conversão aplicando a paridade oficial:
-**Taxa de câmbio de referência:** Utiliza-se a taxa de câmbio de fecho diário publicada pelo Banco Central Europeu (BCE) para o par de moedas em causa.
-**Regra temporal:** A conversão processa-se com base na taxa do próprio dia da operação.
+Sempre que o valor obtido esteja expresso numa divisa diferente de EUR, o sistema efetua a conversão aplicando a paridade oficial:  
+**Taxa de câmbio de referência:** Utiliza-se a taxa de câmbio de fecho diário publicada pelo Banco Central Europeu (BCE) para o par de moedas em causa.  
+**Regra temporal:** A conversão processa-se com base na taxa do próprio dia da operação.  
 **Tratamento de dias não úteis:** Na ausência de publicação de tabelas de câmbio pelo BCE aos fins de semana ou feriados bancários, aplica-se o disposto no Artigo 23.º, n.º 2 do CIRS, utilizando-se a taxa de câmbio oficial do primeiro dia útil subsequente.
 
 #### 3. Fluxo de processamento
