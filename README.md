@@ -110,7 +110,10 @@ Este documento descreve um algoritmo fiscal, desenhado para estar em conformidad
 
 O motor opera sobre os seguintes princípios fundamentais:
 
-1. **FIFO por entidade depositária (Art. 43.º, n.º 9):** O método `FIFO (First-In, First-Out)` é aplicado individualmente a cada "entidade depositária" (ex.: *exchanges*). Todas as carteiras *self-custody* (frias, quentes, etc.) são tratadas como uma única entidade depositária para efeitos de cálculo, a menos que o utilizador opte por separá-las.
+1. **FIFO por entidade depositária (Art. 43.º, n.º 9):** O método `FIFO (First-In, First-Out)` é aplicado individualmente a cada "entidade depositária" com custódia de terceiros (ex.: *exchanges* como Kraken ou Binance). Todas as carteiras *self-custody* (frias, quentes, etc.) são agregadas e tratadas como uma única entidade depositária global para efeitos de cálculo, a menos que o utilizador opte por exceção de titularidade.
+   * **Exceção de titularidade e carteiras terceiras numa aplicação**
+O utilizador pode optar por isolar uma carteira *self-custody* específica alterando a sua classificação `type: 'Other'`. Ao marcar a carteira com este tipo, a carteira passa a ser considerada uma entidade terceira independente. Como consequência, será ignorada no calculo mas todas as transferências de origem em carteiras titulares *(type: 'Exchange', 'Cold Wallet', 'Hot Wallet')* para esta carteira serão processadas como alienações onerosas, gerando a respetiva baixa na pilha do FIFO global do utilizador.
+
 
 2. **Transferência entre entidades é um evento neutro:** Transferir ativos entre entidades do mesmo titular é uma mera mudança de local de custódia. **Não é um evento tributável**. O lote transferido mantém **custo e data de aquisição originais**.
 
@@ -747,4 +750,5 @@ Encontrou uma falha na nossa lógica? Acha que uma interpretação pode ser mais
 
 Este projeto é licenciado sob a [MIT License](LICENSE).  
 Consulta o ficheiro para mais detalhes.
+
 
