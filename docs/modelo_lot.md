@@ -60,7 +60,9 @@ Quando ocorre uma alienação onerosa (venda para Fiat, permuta por outro ativo 
 
 ### Exemplo de Payload `Lot` (JSON)
 
-Cenário de um lote de Bitcoin consolidado no silo global de _Self-Custody_, resultante de duas compras fracionadas em períodos diferentes:
+#### Cenário A: Lote consolidado (agregado)
+Representa um lote de Bitcoin armazenado no silo global de *Self-Custody*, resultante da fusão de duas frações compradas em momentos e preços diferentes:
+
 
 ```json
 {
@@ -86,5 +88,9 @@ Cenário de um lote de Bitcoin consolidado no silo global de _Self-Custody_, res
 }
 
 ```
+
+#### Cenario B: Lote direto (não agregado)
+Representa uma compra direta e isolada numa exchange. Como não houve fusão de frações, a propriedade `is_aggregated` é false e o `provenance_history` contém apenas a "certidão de nascimento" única do próprio lote:
+
 
 [Voltar](../README.md)
