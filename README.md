@@ -147,20 +147,21 @@ O algoritmo calcula os seguintes estados implícitos no momento da transação:
 * **Destino declarativo**: Determinado de forma dinâmica no processamento. Se `type` for 'Exchange' e `countryCode` for 'PT', as mais-valias de curto prazo seguem para o **Anexo G**. Se `type` for 'Exchange' e `countryCode` for diferente de 'PT' (ex: 'IE'), seguem para o **Anexo J**. Para carteiras pessoais ou DeFi (`type` igual a 'Cold Wallet' ou 'Hot Wallet'), o algoritmo assume por defeito o `countryCode` de residência do sujeito passivo (ex: 'PT') para efeitos de `fiscalEligibility`, mas encaminha sempre o curto prazo para o **Anexo J**, uma vez que a custódia não pertence a um intermediário financeiro nacional.
 
 
-#### Estrutura do lote (`Lot`)
-Este modelo representa cada fração de criptoativo armazenada na base de dados local, funcionando como uma pilha cronológica para o método FIFO. Cada lote retém a quantidade disponível, o custo unitário histórico de aquisição e a data original em que o ativo entrou no património do utilizador.
+#### Estrutura do lote [(`Lot`)](docs/modelo_lot.md)
+Este modelo representa o inventário analítico de criptoativos em tempo de execução, funcionando como uma pilha cronológica para o método FIFO dentro de cada silo. Ao contrário de um lote simples, este modelo suporta a agregação de múltiplas frações com custos e datas diferentes resultantes de transferências neutras, mantendo a integridade através de uma árvore genealógica de sub-lotes.
 
-Cada `Lot` deve ter:
+Cada `Lot` possui as seguintes propriedades essenciais:
 
-* **`acquisitionDate`**: Data da operação atual (causada por depósito, permuta ou transferência).
-* **`costPerUnit`**: Custo unitário em EUR.
-* **`amount`**: Quantidade do ativo.
-* **`originalAcquisitionDate`** (opcional): Data da compra original (crucial para a regra dos 365 dias).
-* **`isSecurityToken`** (boolean): Define se o ativo está sujeito a tributação obrigatória (sem isenção de 365 dias).
+* **`id`**: Identificador único do lote (UUID).
+* **`entity_id`**: O identificador do Silo analítico (o nome direto da exchange ou a constante unificada `"SELF_CUSTODY_GLOBAL"`).
+* **`asset`**: O símbolo do criptoativo (ex: "BTC", "ETH").
+* **`acquisition_date`**: Data em que o lote macro consolidado deu entrada na carteira atual.
+* **`amount`**: Quantidade total agregada do ativo contida neste lote específico.
+* **`is_aggregated`**: Flag booleana que indica se o lote resultou da fusão de várias frações.
+* **`provenance_history`**: Lista de objetos que guarda o rastro real de cada sub-lote (contendo `original_acquisition_date`, `amount` e `cost_per_unit`), crucial para auditar a regra de isenção dos 365 dias e o cálculo do FIFO fracionado.
+* **`is_security_token`**: Define se o ativo é um valor mobiliário, o que anula automaticamente qualquer direito à isenção dos 365 dias.
 
 > [!NOTE]
-> O campo `originalAcquisitionDate` preserva a data de compra original quando um ativo é transferido entre entidades, impedindo o reinício incorreto do contador dos 365 dias.
-
 #### Critério de ordenação FIFO e prioridade de consumo
 [//]: # (Issue #6)
 Para garantir o estrito cumprimento do Art. 43.º, n.º 8, al. g) do CIRS ("os alienados são os adquiridos há mais tempo"), o algoritmo impõe uma distinção clara entre a prioridade de consumo de um lote e a sua disponibilidade física:
@@ -179,7 +180,8 @@ Para garantir o estrito cumprimento do Art. 43.º, n.º 8, al. g) do CIRS ("os a
 Para evitar o crescimento excessivo deste documento com propriedades estritas de engenharia de software, os esquemas de propriedades detalhados dos restantes modelos e payloads foram movidos para a documentação técnica de suporte:
 
 [Especificação completa de (`Wallet`)](docs/modelo_wallet.md)<br>
-[Especificação completa de (`Transaction`)](docs/modelo_transaction.md) - Contém todos os campos de importação de dados e o funcionamento além de `feeFiatValue`.
+[Especificação completa de (`Transaction`)](docs/modelo_transaction.md) - Contém todos os campos de importação de dados e o funcionamento além de `feeFiatValue`.  
+[Especificação completa de (HybridLot)](docs/modelo_lot.md)- Modelo analítico que controla o inventário de criptoativos
 </details>
 
 ### 2.3 Critério de indexação e conversão de cotações (Moedas estrangeiras e API)

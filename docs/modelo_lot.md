@@ -1,4 +1,4 @@
-# Especificação técnica: Modelo de sub-lotes e inventário (`HybridLot`)
+# Especificação técnica: modelo de sub-lotes e inventário (`Lot`)
 
 Representa a estrutura de dados utilizada pelo motor analítico em tempo de execução para gerir o inventário de criptoativos em conformidade com o Artigo 43.º, n.º 9 do CIRS. Este modelo suporta a agregação de frações provenientes de transferências neutras através de um histórico detalhado de proveniência (`provenance_history`).
 
@@ -19,10 +19,10 @@ Representa a estrutura de dados utilizada pelo motor analítico em tempo de exec
 
 Para cumprir a legislação fiscal portuguesa, o motor não pode criar pilhas FIFO isoladas para cada endereço físico ou chave pública de carteiras privadas. O pipeline deve injetar os lotes na pilha associando-os ao `entity_id` correto com base no `type` da carteira de destino:
 
-1. **Exchanges (Silo por Plataforma):** Se a carteira for `type: 'Exchange'`, o `entity_id` assume diretamente o nome da plataforma de origem.
+1. **Exchanges (silo por plataforma):** Se a carteira for `type: 'Exchange'`, o `entity_id` assume diretamente o nome da plataforma de origem.
    * *Exemplo:* Uma compra na Kraken gera um lote com `entity_id: "Kraken"`.
-2. **Self-Custody (Silo Global Unificado):** Se a carteira for `type: 'Cold Wallet'` ou `'Hot Wallet'`, o motor ignora o nome individual (Ledger, Metamask, etc.) e força o agrupamento usando a string única: **`"Self-Custody-Global"`**.
-3. **Third-Party (Sem Silo):** Se for `type: 'Other'`, o motor desconsidera as operações nativas e nunca gera um `HybridLot`.
+2. **Self-Custody (silo global unificado):** Se a carteira for `type: 'Cold Wallet'` ou `'Hot Wallet'`, o motor ignora o nome individual (Ledger, Metamask, etc.) e força o agrupamento usando a string única: **`"SELF_CUSTODY_GLOBAL"`**.
+3. **Third-Party (sem silo):** Se for `type: 'Other'`, o motor desconsidera as operações nativas e nunca gera um `HybridLot`.
 
 ---
 
@@ -40,17 +40,17 @@ Cada item da lista representa a "certidão de nascimento" fiscal de um sub-lote 
 
 ### Comportamento analítico no _pipeline_ (gestão de pilhas)
 
-O motor manipula a lista de lotes (`List<HybridLot>`) ordenada dinamicamente pela data de aquisição dentro de cada Silo através de duas regras operacionais:
+O motor manipula a lista de lotes (`List<Lot>`) ordenada dinamicamente pela data de aquisição dentro de cada silo através de duas regras operacionais:
 
 #### 1. Fusão neutra (agregação de lotes)
-Ao transferir frações de ativos entre carteiras titulares do mesmo utilizador, o evento é classificado como fiscalmente neutro. O motor localiza o Silo de destino através do `entity_id`:
-* Se os ativos forem consolidados (ex: transferência de várias exchanges para uma Ledger), o motor cria um único `HybridLot` macro.
+Ao transferir frações de ativos entre carteiras titulares do mesmo utilizador, o evento é classificado como fiscalmente neutro. O motor localiza o silo de destino através do `entity_id`:
+* Se os ativos forem consolidados (ex: transferência de várias exchanges para uma Ledger), o motor cria um único `Lot` macro.
 * A flag `is_aggregated` é marcada como `true`.
 * O `amount` total passa a ser o somatório das partes.
 * As sub-frações individuais são injetadas em `provenance_history`, preservando intactas as suas `original_acquisition_date` e `cost_per_unit` originais.
 
 #### 2. Consumo FIFO fracionado (cisão de lotes)
-Quando ocorre uma alienação onerosa (venda para Fiat, permuta por outro ativo ou transferência para uma carteira do tipo `'Other'`), o algoritmo localiza a pilha do Silo correspondente e ordena os elementos contidos em `provenance_history` de forma cronológica pela data mais antiga. Se a venda for parcial:
+Quando ocorre uma alienação onerosa (venda para Fiat, permuta por outro ativo ou transferência para uma carteira do tipo `'Other'`), o algoritmo localiza a pilha do silo correspondente e ordena os elementos contidos em `provenance_history` de forma cronológica pela data mais antiga. Se a venda for parcial:
 * O motor abate o `amount` do sub-lote interno que está no topo do FIFO.
 * Deduz proporcionalmente o `amount` do lote macro principal.
 * Se um sub-lote for totalmente consumido, é removido da lista `provenance_history`.
@@ -58,9 +58,9 @@ Quando ocorre uma alienação onerosa (venda para Fiat, permuta por outro ativo 
 
 ---
 
-### Exemplo de Payload `HybridLot` (JSON)
+### Exemplo de Payload `Lot` (JSON)
 
-Cenário de um lote de Bitcoin consolidado no Silo Global de Self-Custody, resultante de duas compras fracionadas em períodos diferentes:
+Cenário de um lote de Bitcoin consolidado no silo global de _Self-Custody_, resultante de duas compras fracionadas em períodos diferentes:
 
 ```json
 {
