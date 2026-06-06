@@ -63,7 +63,6 @@ Quando ocorre uma alienação onerosa (venda para Fiat, permuta por outro ativo 
 #### Cenário A: Lote consolidado (agregado)
 Representa um lote de Bitcoin armazenado no silo global de *Self-Custody*, resultante da fusão de duas frações compradas em momentos e preços diferentes:
 
-
 ```json
 {
   "id": "LOT-DEST-001",
@@ -92,5 +91,23 @@ Representa um lote de Bitcoin armazenado no silo global de *Self-Custody*, resul
 #### Cenario B: Lote direto (não agregado)
 Representa uma compra direta e isolada numa exchange. Como não houve fusão de frações, a propriedade `is_aggregated` é false e o `provenance_history` contém apenas a "certidão de nascimento" única do próprio lote:
 
+```json
+{
+  "id": "LOT-DIRECT-002",
+  "entity_id": "Kraken",
+  "asset": "BTC",
+  "acquisition_date": "2024-03-20T14:30:00.000Z",
+  "amount": 0.00500000,
+  "is_aggregated": false,
+  "provenance_history": [
+    {
+      "original_acquisition_date": "2024-03-20T14:30:00.000Z",
+      "amount": 0.00500000,
+      "cost_per_unit": 62500.00
+    }
+  ],
+  "is_security_token": false
+}
+```
 
 [Voltar](../README.md)
