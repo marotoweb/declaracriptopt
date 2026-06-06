@@ -153,25 +153,24 @@ Este modelo representa o inventário analítico de criptoativos em tempo de exec
 Cada `Lot` possui as seguintes propriedades essenciais:
 
 * **`id`**: Identificador único do lote (UUID).
-* **`entity_id`**: O identificador do Silo analítico (o nome direto da exchange ou a constante unificada `"SELF_CUSTODY_GLOBAL"`).
+* **`entity_id`**: O identificador do silo analítico (o nome direto da exchange ou a constante unificada `"SELF_CUSTODY_GLOBAL"`).
 * **`asset`**: O símbolo do criptoativo (ex: "BTC", "ETH").
 * **`acquisition_date`**: Data em que o lote macro consolidado deu entrada na carteira atual.
 * **`amount`**: Quantidade total agregada do ativo contida neste lote específico.
 * **`is_aggregated`**: Flag booleana que indica se o lote resultou da fusão de várias frações.
-* **`provenance_history`**: Lista de objetos que guarda o rastro real de cada sub-lote (contendo `original_acquisition_date`, `amount` e `cost_per_unit`), crucial para auditar a regra de isenção dos 365 dias e o cálculo do FIFO fracionado.
+* **`provenance_history`**: Lista de objetos que guarda o rastro real de cada sub-lote (contendo `original_acquisition_date`, `amount` e `cost_per_unit`). Este histórico preserva a data de compra `original_acquisition_date` e o custo originais `cost_per_unit` quando um ativo é transferido entre entidades, impedindo o reinício incorreto do contador dos 365 dias de isenção fiscal e garantindo o cálculo preciso do FIFO fracionado quando aplicável.
 * **`is_security_token`**: Define se o ativo é um valor mobiliário, o que anula automaticamente qualquer direito à isenção dos 365 dias.
 
-> [!NOTE]
 #### Critério de ordenação FIFO e prioridade de consumo
 [//]: # (Issue #6)
 Para garantir o estrito cumprimento do Art. 43.º, n.º 8, al. g) do CIRS ("os alienados são os adquiridos há mais tempo"), o algoritmo impõe uma distinção clara entre a prioridade de consumo de um lote e a sua disponibilidade física:
 
-1. **Chave de ordenação FIFO (Prioridade):** antes de processar qualquer venda ou permuta, a lista cronológica de lotes (`List<Lot>`) pertencente à entidade e ao ativo em causa deve ser obrigatoriamente ordenada de forma ascendente pela sua data de aquisição original efetiva:
-   $$\text{Data de ordenação} = \text{originalAcquisitionDate} \ ?? \ \text{acquisitionDate}$$
-   Isto garante que um lote comprado em 2022, mas transferido para a exchange apenas em 2026, mantenha prioridade absoluta de consumo sobre um lote comprado diretamente na exchange em 2025.
+1. **Chave de ordenação FIFO (Prioridade):** antes de processar qualquer venda ou permuta, a lista cronológica de lotes (`List<Lot>`) pertencente à entidade e ao ativo em causa deve ser obrigatoriamente ordenada de forma ascendente pela sua data de aquisição original efetiva extraída do histórico de proveniência:
+   $$\text{Data de ordenação} = \text{original\_acquisition\_date}$$
+   Isto garante que um sub-lote comprado em 2022, mas transferido para a exchange apenas em 2026, mantenha prioridade absoluta de consumo sobre um lote comprado diretamente na exchange em 2025.
 
-2. **Filtro de disponibilidade temporal:** a data de entrada do lote na carteira específica (`acquisitionDate`) não determina a sua antiguidade fiscal, mas atua como um filtro de segurança. O algoritmo apenas considera um lote elegível para consumo se:
-   $$\text{acquisitionDate do lote} \le \text{Data de realização da venda}$$
+2. **Filtro de disponibilidade temporal:** a data de entrada do lote macro na carteira específica (`acquisition_date`) não determina a sua antiguidade fiscal, mas atua como um filtro de segurança. O algoritmo apenas considera um lote elegível para consumo se:
+   $$\text{acquisition\_date do lote} \le \text{Data de realização da venda}$$
    Este filtro impede que o motor de cálculo consuma retroativamente saldos que ainda não tinham sido movidos para aquela entidade no momento cronológico da operação.
 
 #### Estruturas avançadas de suporte (implementação de código)
@@ -181,7 +180,7 @@ Para evitar o crescimento excessivo deste documento com propriedades estritas de
 
 [Especificação completa de (`Wallet`)](docs/modelo_wallet.md)<br>
 [Especificação completa de (`Transaction`)](docs/modelo_transaction.md) - Contém todos os campos de importação de dados e o funcionamento além de `feeFiatValue`.  
-[Especificação completa de (HybridLot)](docs/modelo_lot.md)- Modelo analítico que controla o inventário de criptoativos
+[Especificação completa de (`Lot`)](docs/modelo_lot.md)- Modelo analítico que controla o inventário de criptoativos
 </details>
 
 ### 2.3 Critério de indexação e conversão de cotações (Moedas estrangeiras e API)
