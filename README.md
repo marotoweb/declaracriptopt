@@ -114,7 +114,6 @@ O motor opera sobre os seguintes princípios fundamentais:
    * **Exceção de titularidade e carteiras terceiras numa aplicação**
 O utilizador pode optar por isolar uma carteira *self-custody* específica alterando a sua classificação `type: 'Other'`. Ao marcar a carteira com este tipo, a carteira passa a ser considerada uma entidade terceira independente. Como consequência, será ignorada no calculo mas todas as transferências de origem em carteiras titulares *(type: 'Exchange', 'Cold Wallet', 'Hot Wallet')* para esta carteira serão processadas como alienações onerosas, gerando a respetiva baixa na pilha do FIFO global do utilizador.
 
-
 2. **Transferência entre entidades é um evento neutro:** Transferir ativos entre entidades do mesmo titular é uma mera mudança de local de custódia. **Não é um evento tributável**. O lote transferido mantém **custo e data de aquisição originais**.
 
 3. **Elegibilidade territorial e cláusula anti-abuso (Art. 10.º, n.º 21):** Os benefícios de neutralidade fiscal nas permutas e a isenção de mais-valias após 365 dias aplicam-se apenas se a entidade onde se realiza a operação ou a contraparte estiver sediada num país cooperante (Estados-Membros da UE, EEE ou países com convenção de dupla tributação ou acordo de troca de informações com Portugal). Se a jurisdição for considerada não cooperante (paraíso fiscal), todos os benefícios fiscais deixam de se aplicar.
@@ -145,7 +144,6 @@ Cada entidade (carteira ou *exchange*) deve ser criada com os seguintes atributo
 O algoritmo calcula os seguintes estados implícitos no momento da transação:
 * **`fiscalEligibility`**: Determinado a partir do `countryCode`. Consulta uma tabela interna para classificar o país como cooperante (`COOPERATING`), não cooperante (`NON_COOPERATING` - paraísos fiscais da lista negra nacional) ou desconhecido. O estado desconhecido suspende o cálculo para obrigar à revisão e intervenção manual. De forma análoga, qualquer transação que apresente uma taxa em criptoativo sem o campo feeFiatValue preenchido é marcada com o estado INCOMPLETE e excluída do cálculo e do relatório de exportação até resolução manual.
 * **Destino declarativo**: Determinado de forma dinâmica no processamento. Se `type` for 'Exchange' e `countryCode` for 'PT', as mais-valias de curto prazo seguem para o **Anexo G**. Se `type` for 'Exchange' e `countryCode` for diferente de 'PT' (ex: 'IE'), seguem para o **Anexo J**. Para carteiras pessoais ou DeFi (`type` igual a 'Cold Wallet' ou 'Hot Wallet'), o algoritmo assume por defeito o `countryCode` de residência do sujeito passivo (ex: 'PT') para efeitos de `fiscalEligibility`, mas encaminha sempre o curto prazo para o **Anexo J**, uma vez que a custódia não pertence a um intermediário financeiro nacional.
-
 
 #### Estrutura do lote [(`Lot`)](docs/modelo_lot.md)
 Este modelo representa o inventário analítico de criptoativos em tempo de execução, funcionando como uma pilha cronológica para o método FIFO dentro de cada silo. Ao contrário de um lote simples, este modelo suporta a agregação de múltiplas frações com custos e datas diferentes resultantes de transferências neutras, mantendo a integridade através de uma árvore genealógica de sub-lotes.
@@ -751,5 +749,3 @@ Encontrou uma falha na nossa lógica? Acha que uma interpretação pode ser mais
 
 Este projeto é licenciado sob a [MIT License](LICENSE).  
 Consulta o ficheiro para mais detalhes.
-
-
