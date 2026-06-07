@@ -2,10 +2,11 @@
 
 Esta especificação técnica atua como uma tabela de consulta estática e imutável para o motor de pipeline analítico. O seu objetivo primordial é mapear os códigos numéricos oficiais utilizados pela Autoridade Tributária e Aduaneira (AT), dividindo rigorosamente as strings linguísticas de identificação e injetando as flags binárias de cooperação fiscal (*Offshores*) em conformidade estrita com a **Portaria n.º 150/2004** (atualizada pela Portaria n.º 292/2025).
 
-[!WARNING] **Aviso legal e de atualização fiscal**
-Esta matriz foi construída com base na legislação vigente e em fontes oficiais à data de **junho de 2026**, nomeadamente:
-- **Portaria n.º 150/2004** (lista de países não cooperantes), com as alterações da **Portaria n.º 292/2025**.
-- **Tabela oficial de convenções para evitar a dupla tributação (CDT)**: [Tabela_CDT_2026.pdf](https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/convencoes_evitar_dupla_tributacao/convencoes_tabelas_doclib/Documents/Tabela_CDT_2026.pdf).
+> [!WARNING]
+>**Aviso legal e de atualização fiscal**
+>Esta matriz foi construída com base na legislação vigente e em fontes oficiais à data de **junho de 2026**, nomeadamente:
+>- **Portaria n.º 150/2004** (lista de países não cooperantes), com as alterações da **Portaria n.º 292/2025**.
+>- **Tabela oficial de convenções para evitar a dupla tributação (CDT)**: [Tabela_CDT_2026.pdf](https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/convencoes_evitar_dupla_tributacao/convencoes_tabelas_doclib/Documents/Tabela_CDT_2026.pdf).
 
 No entanto:
 1. **Natureza dinâmica:** A lista de jurisdições não cooperantes e o estado das CDTs são suscetíveis a alterações frequentes por parte da Autoridade Tributária (AT) e do Ministério dos Negócios Estrangeiros.
@@ -193,7 +194,7 @@ A existência de uma convenção para evitar a dupla tributação (CDT) **NÃO**
 | 858 | UY | URY | URUGUAI | URUGUAI, EASTERN REPUBLIC OF | Cooperante | Sim | 28% (Geral) |
 | 548 | VU | VUT | VANUATU | VANUATU, REPUBLIC OF | Não Cooperante | Não | **35% (Agravada)** |
 
-[!NOTE] 
-1. Países omitidos nesta amostra seguem o padrão regulamentar de Cooperante [28%], a menos que pertençam aos sub-regimes específicos estipulados na Portaria n.º 150/2004.
-2. **Hierarquia de regras:** Para efeitos de criptoativos (Anexo J), a coluna `Cooperação Fiscal` prevalece sobre `Possui CDT`. Jurisdições como Suíça, Luxemburgo e Malta possuem CDT ativa, mas aplicam-se sempre a 35% devido ao estatuto de Não Cooperante.
-3. **CDT denunciada:** Suécia (2022), Finlândia (2019) e Quénia (não vigente) não possuem tratados ativos para benefícios fiscais atuais, apesar de poderem constar em listas históricas.
+> [!NOTE] 
+>1. Países omitidos nesta amostra seguem o padrão regulamentar de Cooperante [28%], a menos que pertençam aos sub-regimes específicos estipulados na Portaria n.º 150/2004.
+>2. **Hierarquia de regras:** Para efeitos de criptoativos (Anexo J), a coluna `Cooperação Fiscal` prevalece sobre `Possui CDT`. Jurisdições como Suíça, Luxemburgo e Malta possuem CDT ativa, mas aplicam-se sempre a 35% devido ao estatuto de Não Cooperante.
+>3. **CDT denunciada:** Suécia (2022), Finlândia (2019) e Quénia (não vigente) não possuem tratados ativos para benefícios fiscais atuais, apesar de poderem constar em listas históricas.
