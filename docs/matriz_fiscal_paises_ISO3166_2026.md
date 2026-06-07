@@ -36,7 +36,7 @@ A existência de uma convenção para evitar a dupla tributação (CDT) não anu
 | 710 | ZA | ZAF | ÁFRICA DO SUL | SOUTH AFRICA, REPUBLIC OF | Cooperante | Sim | 28% (Geral) |
 | 008 | AL | ALB | ALBÂNIA | ALBANIA, PEOPLE'S SOCIALIST REPUBLIC OF | Cooperante | Não | 28% (Geral) |
 | 276 | DE | DEU | ALEMANHA | GERMANY | Cooperante | Sim | 28% (Geral) |
-| 020 | AD | AND | ANDORRA | ANDORRA, PRINCIPALITY OF | Não Cooperante | Sim | 35% (Agravada) |
+| 020 | AD | AND | ANDORRA | ANDORRA, PRINCIPALITY OF | Cooperante | Sim | 28% (Geral) |
 | 024 | AO | AGO | ANGOLA | ANGOLA, REPUBLIC OF | Cooperante | Sim | 28% (Geral) |
 | 660 | AI | AIA | ANGUILA | ANGUILLA | Não Cooperante | Não | 35% (Agravada) |
 | 010 | AQ | ATA | ANTÁRCTICA | ANTARCTICA (THE TERRITORY SOUTH OF 60 DEG S) | Cooperante | Não | 28% (Geral) |
