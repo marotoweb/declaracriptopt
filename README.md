@@ -139,7 +139,7 @@ Cada entidade (carteira ou *exchange*) deve ser criada com os seguintes atributo
 * **`name`**: Nome dado pelo utilizador à carteira (ex: "Kraken", "Ledger Nano X").
 * **`type`**: O tipo de carteira. Ex: '*Exchange*', '*Cold Wallet*', '*Hot Wallet*', '*Other*'.
 * **`creationDate`**: Data em que a carteira foi criada.
-* **`countryCode`**: Código ISO-3166 alfa-2 do país onde a entidade está sediada (ex: 'PT', 'IE', 'KY').
+* **`countryCode`**: [`Código ISO-3166 alfa-2`](docs/matriz_fiscal_paises_ISO3166_2026.md) do país onde a entidade está sediada (ex: 'PT', 'IE', 'KY').
 
 O algoritmo calcula os seguintes estados implícitos no momento da transação:
 * **`fiscalEligibility`**: Determinado a partir do `countryCode`. Consulta uma tabela interna para classificar o país como cooperante (`COOPERATING`), não cooperante (`NON_COOPERATING` - paraísos fiscais da lista negra nacional) ou desconhecido. O estado desconhecido suspende o cálculo para obrigar à revisão e intervenção manual. De forma análoga, qualquer transação que apresente uma taxa em criptoativo sem o campo feeFiatValue preenchido é marcada com o estado INCOMPLETE e excluída do cálculo e do relatório de exportação até resolução manual.
